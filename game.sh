@@ -6,7 +6,7 @@
 #Main Vars
 GAMENAME="Placeholder title"
 VERSION="v0.0.1a"
-DEBUG=false
+DEBUG=true
 GAMELOOP=true
 
 #Game Vars
@@ -32,14 +32,19 @@ function playercommand {
     return
   fi
   #normalise command
-  #COMMAND=$(echo $1 | tr -dc '[:alnum:]' | tr '[:upper:]' '[:lower:]')
+  #COMMAND=$(echo $1 | tr -dc '[:alnum:]' | tr '[:upper:]' '[:lower:]')i
+
+  #remove some middle words
+  COMMAND=$(echo $COMMAND | sed 's/ a / /g' | sed 's/ the / /g' | sed 's/ some / /g')
 
   if $DEBUG; then 
     echo -e "${GREEN}[DEBUG] ${NC}Command issued: $COMMAND"
   fi
  
   #process player command
-
+  WORD1=""
+  WORD2=""
+  WORD3=""
   #check for multiple words
   if [[ $COMMAND == *" "* ]]; then
     WORD1=$(echo $COMMAND | cut -d " " -f 1)
@@ -62,6 +67,12 @@ function playercommand {
           esac
           ;;
         * )
+      esac
+      ;;
+    take )
+      case $WORD2 in
+        "" ) echo "Take what?"; return 1 ;;
+        nap ) echo "You take a short nap, only to feel even worse than before."; return ;;
       esac
       ;;
     * ) echo "I beg you pardon?"; return 1;;
