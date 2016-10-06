@@ -6,7 +6,7 @@
 #Main Vars
 GAMENAME="Placeholder title"
 VERSION="v0.0.1a"
-DEBUG=true
+DEBUG=false
 GAMELOOP=true
 
 #Game Vars
@@ -35,7 +35,7 @@ function playercommand {
   #COMMAND=$(echo $1 | tr -dc '[:alnum:]' | tr '[:upper:]' '[:lower:]')i
 
   #remove some middle words
-  COMMAND=$(echo $COMMAND | sed 's/ a / /g' | sed 's/ the / /g' | sed 's/ some / /g')
+  COMMAND=$(echo $COMMAND | sed 's/\sa\s/ /g' | sed 's/\sthe\s/ /g' | sed 's/\ssome\s/ /g')
 
   if $DEBUG; then 
     echo -e "${GREEN}[DEBUG] ${NC}Command issued: $COMMAND"
@@ -75,16 +75,51 @@ function playercommand {
         nap ) echo "You take a short nap, only to feel even worse than before."; return ;;
       esac
       ;;
+    go )
+      case $WORD2 in
+        north ) moveroom 0 +1; return;;
+        south ) moveroom 0 -1; return;;
+        east )  moveroom -1 0; return;;
+        west )  moveroom +1 0; return;;
+      esac
+      ;;
+    quit ) echo "Goodbye." ; exit;;
     * ) echo "I beg you pardon?"; return 1;;
   esac 
 
 }
 
+function moveroom { 
+  if $DEBUG; then 
+    echo -e "${GREEN}[DEBUG] ${NC}About to move room, calculation: $CURRENTX$1,$CURRENTX$2"
+  fi
+  #keep last step incase we hit an invalid room
+  PREVX=$CURRENTX
+  PREVY=$CURRENTY
+
+  CURRENTX=$(echo $(($CURRENTX$1)))
+  CURRENTY=$(echo $(($CURRENTY$2)))
+
+  TEST=$(getroomdescription) 
+  if ! [ $? -eq 0 ]; then
+    #rollback if invalid room
+    CURRENTX=$PREVX
+    CURRENTY=$PREVY
+    echo "You can't go that way."
+    return
+  fi
+  getroomdescription
+}
+
 function getroomdescription {
   #which map are we on?
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
-    "overworld,0,0" ) echo "You find yourself in the starting area." ;;
-     * ) echo "${RED}[ERROR] ${NC}Invalid room. You should not be here." return; ;;
+    "overworld,0,0" ) echo "You find yourself on a crossroad. There is a road in each direction." ; return ;;
+    "overworld,0,1" ) echo "You find yourself on a dead end. There is a road to the south." ; return ;;
+    "overworld,0,-1" ) echo "You find yourself on a dead end. There is a road to the north." ; return ;;
+    "overworld,-1,0" ) echo "You find yourself on a dead end. There is a road to the west." ; return ;;
+    "overworld,1,0" ) echo "You find yourself on a road leading to a house. There is a road to the east." ; return ;;
+     * ) echo -e "${RED}[ERROR] ${NC}Invalid room. You should not be here." ; return 1;;
   esac
 }
 
