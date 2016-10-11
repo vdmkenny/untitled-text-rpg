@@ -6,7 +6,7 @@
 #Main Vars
 GAMENAME="Placeholder title"
 VERSION="v0.0.1a"
-DEBUG=false
+DEBUG=true
 GAMELOOP=true
 
 #Game Vars
@@ -66,6 +66,7 @@ function playercommand {
             room|area ) getroomdescription; return ;;
           esac
           ;;
+	around ) getroomdescription; return ;;
         * )
       esac
       ;;
@@ -77,10 +78,10 @@ function playercommand {
       ;;
     go )
       case $WORD2 in
-        north ) moveroom 0 +1; return;;
-        south ) moveroom 0 -1; return;;
-        east )  moveroom -1 0; return;;
-        west )  moveroom +1 0; return;;
+        n|north ) moveroom 0 +1; return;;
+        s|south ) moveroom 0 -1; return;;
+        e|east )  moveroom -1 0; return;;
+        w|west )  moveroom +1 0; return;;
       esac
       ;;
     quit ) echo "Goodbye." ; exit;;
@@ -119,6 +120,7 @@ function getroomdescription {
     "overworld,0,-1" ) echo "You find yourself on a dead end. There is a road to the north." ; return ;;
     "overworld,-1,0" ) echo "You find yourself on a dead end. There is a road to the west." ; return ;;
     "overworld,1,0" ) echo "You find yourself on a road leading to a house. There is a road to the east." ; return ;;
+    "house,0,0" ) echo "You're inside a small abandoned house. It's empty, except for a chest in the middle of the room." ; return ;;
      * ) echo -e "${RED}[ERROR] ${NC}Invalid room. You should not be here." ; return 1;;
   esac
 }
@@ -146,7 +148,6 @@ done
 #make playername blue always
 PLAYERNAME="${BLUE}$PLAYERNAME${NC}"
 
-echo
 echo -e "Hello, $PLAYERNAME!"
 
 #Main gameloop
