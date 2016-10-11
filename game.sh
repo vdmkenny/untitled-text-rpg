@@ -5,8 +5,8 @@
 
 #Main Vars
 GAMENAME="Placeholder title"
-VERSION="v0.0.1a"
-DEBUG=true
+VERSION="v0.0.2"
+DEBUG=false
 GAMELOOP=true
 
 #Game Vars
@@ -14,7 +14,8 @@ PLAYERNAME=""
 CURRENTMAP="overworld"
 CURRENTX="0"
 CURRENTY="0"
-HOUSECHESTOPEN=false
+HOUSE_CHEST_OPEN=false
+HAS_SWORD=false
 
 #Colors
 BLUE='\033[0;34m'
@@ -77,6 +78,7 @@ function playercommand {
       case $WORD2 in
         "" ) echo "Take what?"; return 1 ;;
         nap ) echo "You take a short nap, only to feel even worse than before."; return ;;
+        * ) takeobject $WORD2; return ;;
       esac
       ;;
     go )
@@ -193,12 +195,12 @@ function openobject {
     "house,0,0" )
       case $1 in
         chest ) 
-          if $HOUSECHESTOPEN; then
+          if $HOUSE_CHEST_OPEN; then
             echo "It's already opened!"; 
           fi
-          if ! $HOUSECHESTOPEN; then
+          if ! $HOUSE_CHEST_OPEN; then
             echo "With a creak of the tired hinges, the chest opens."; 
-            HOUSECHESTOPEN=true;
+            HOUSE_CHEST_OPEN=true;
           fi
           return;;
       esac
@@ -223,12 +225,12 @@ function closeobject {
     "house,0,0" )
       case $1 in
         chest ) 
-          if ! $HOUSECHESTOPEN; then
+          if ! $HOUSE_CHEST_OPEN; then
             echo "It's not open to begin with."; 
           fi
-          if $HOUSECHESTOPEN; then
+          if $HOUSE_CHEST_OPEN; then
             echo "You close the chest's lid, which falls shut with a loud thud."; 
-            HOUSECHESTOPEN=false;
+            HOUSE_CHEST_OPEN=false;
           fi
           return;;
       esac
@@ -254,10 +256,10 @@ function inspectobject {
       case $1 in
         chest ) 
           echo "It's chest made of wood. It looks really old and worn."
-          if ! $HOUSECHESTOPEN; then
+          if ! $HOUSE_CHEST_OPEN; then
             echo "It's closed shut."; 
           fi
-          if $HOUSECHESTOPEN; then
+          if $HOUSE_CHEST_OPEN; then
             echo "It's currently open."; 
           fi
           return;;
@@ -283,15 +285,54 @@ function lookinsideobject {
     "house,0,0" )
       case $1 in
         chest ) 
-          if ! $HOUSECHESTOPEN; then
+          if ! $HOUSE_CHEST_OPEN; then
             echo "The chest is closed, and definitely not transparant. Maybe you should try opening it first?"; 
           fi
-          if $HOUSECHESTOPEN; then
-            echo "There's nothing inside... How anticlimactic."; 
+          if $HOUSE_CHEST_OPEN; then
+		echo "You peer into the chest with hopeful eyes..."
+		if $HAS_SWORD; then
+			echo "There's nothing in there but dirt."
+		else
+			echo "There's a shortsword in there! It's obviously well used, but it still looks sharp."
+		fi
           fi
           return;;
       esac
       ;;
+     * ) echo "$1? I don't see a $1!";;
+  esac
+}
+
+function takeobject { 
+  if [ -z $1 ];then
+    if $DEBUG; then 
+      echo -e "${GREEN}[DEBUG] ${NC}No object specified."
+    fi
+    echo -e "Take what?"
+    return
+  fi
+  if $DEBUG; then 
+    echo -e "${GREEN}[DEBUG] ${NC}Trying to take: $1"
+  fi
+  #which map are we on?
+  case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
+    "house,0,0" )
+      case $1 in
+      sword ) if $HOUSE_CHEST_OPEN; then
+                if ! $HAS_SWORD; then
+                  HAS_SWORD=true;
+                  echo "You pick up the sword from the chest. It makes a pleasing sshinggg sound while doing so.";
+		else
+		  echo "There was only one... Don't get greedy."
+		fi
+              else
+                echo "I can't see a sword right now.";
+              fi
+	      return;
+      ;;
+      * ) echo "I can't see a $1 right now." ;; 
+      esac
+     ;;
      * ) echo "$1? I don't see a $1!";;
   esac
 }
