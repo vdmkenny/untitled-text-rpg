@@ -14,6 +14,7 @@ PLAYERNAME=""
 CURRENTMAP="overworld"
 CURRENTX="0"
 CURRENTY="0"
+HOUSECHESTOPEN=false
 
 #Colors
 BLUE='\033[0;34m'
@@ -64,9 +65,11 @@ function playercommand {
             floor|ground ) echo "It's dirty."; return ;;
             sky ) echo "It's blue."; return ;;
             room|area ) getroomdescription; return ;;
+            * ) inspectobject $WORD3; return ;;
           esac
           ;;
 	around ) getroomdescription; return ;;
+	in|inside ) lookinsideobject $WORD3; return ;;
         * )
       esac
       ;;
@@ -78,13 +81,20 @@ function playercommand {
       ;;
     go )
       case $WORD2 in
-        n|north ) moveroom 0 +1; return;;
-        s|south ) moveroom 0 -1; return;;
-        e|east )  moveroom -1 0; return;;
-        w|west )  moveroom +1 0; return;;
+        n|north )   moveroom 0 +1; return;;
+        s|south )   moveroom 0 -1; return;;
+        e|east )    moveroom -1 0; return;;
+        w|west )    moveroom +1 0; return;;
+        in|inside ) enterroom $WORD3; return;;
+        * ) echo "Go where?"; return;;
       esac
       ;;
-    quit ) echo "Goodbye." ; exit;;
+    enter ) enterroom $WORD2; return;;
+    open )  openobject $WORD2; return;;
+    close|shut )  closeobject $WORD2; return;;
+    inspect )  inspectobject $WORD2; return;;
+    exit )  exitroom; return;;
+    quit )  echo "Goodbye." ; exit;;
     * ) echo "I beg you pardon?"; return 1;;
   esac 
 
@@ -112,6 +122,48 @@ function moveroom {
   getroomdescription
 }
 
+function enterroom { 
+  if [ -z $1 ];then
+    if $DEBUG; then 
+      echo -e "${GREEN}[DEBUG] ${NC}No room specified."
+    fi
+    echo -e "Where?"
+    return
+  fi
+  if $DEBUG; then 
+    echo -e "${GREEN}[DEBUG] ${NC}Trying to enter room: $1"
+  fi
+  #which map are we on?
+  case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
+    "overworld,1,0" )
+      case $1 in
+        house ) warp house 0 0; return;; 
+      esac
+      ;;
+     * ) echo "There is no $1 here...";;
+  esac
+}
+
+function exitroom { 
+  if $DEBUG; then 
+    echo -e "${GREEN}[DEBUG] ${NC}Trying to exit room: $CURRENTMAP,$CURRENTX,$CURRENTY"
+  fi
+  #which map are we on?
+  case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
+    "house,0,0" ) warp overworld 1 0;;
+     * ) echo "We're already outside!";;
+  esac
+}
+function warp {
+  if $DEBUG; then 
+     echo -e "${GREEN}[DEBUG] ${NC}Warping to $1,$2,$3"
+  fi
+  CURRENTMAP=$1
+  CURRENTX=$2
+  CURRENTY=$3
+  getroomdescription
+}
+
 function getroomdescription {
   #which map are we on?
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
@@ -122,6 +174,125 @@ function getroomdescription {
     "overworld,1,0" ) echo "You find yourself on a road leading to a house. There is a road to the east." ; return ;;
     "house,0,0" ) echo "You're inside a small abandoned house. It's empty, except for a chest in the middle of the room." ; return ;;
      * ) echo -e "${RED}[ERROR] ${NC}Invalid room. You should not be here." ; return 1;;
+  esac
+}
+
+function openobject { 
+  if [ -z $1 ];then
+    if $DEBUG; then 
+      echo -e "${GREEN}[DEBUG] ${NC}No object specified."
+    fi
+    echo -e "Open what?"
+    return
+  fi
+  if $DEBUG; then 
+    echo -e "${GREEN}[DEBUG] ${NC}Trying to open: $1"
+  fi
+  #which map are we on?
+  case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
+    "house,0,0" )
+      case $1 in
+        chest ) 
+          if $HOUSECHESTOPEN; then
+            echo "It's already opened!"; 
+          fi
+          if ! $HOUSECHESTOPEN; then
+            echo "With a creak of the tired hinges, the chest opens."; 
+            HOUSECHESTOPEN=true;
+          fi
+          return;;
+      esac
+      ;;
+     * ) echo "$1? I don't see a $1!";;
+  esac
+}
+
+function closeobject { 
+  if [ -z $1 ];then
+    if $DEBUG; then 
+      echo -e "${GREEN}[DEBUG] ${NC}No object specified."
+    fi
+    echo -e "Close what?"
+    return
+  fi
+  if $DEBUG; then 
+    echo -e "${GREEN}[DEBUG] ${NC}Trying to close: $1"
+  fi
+  #which map are we on?
+  case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
+    "house,0,0" )
+      case $1 in
+        chest ) 
+          if ! $HOUSECHESTOPEN; then
+            echo "It's not open to begin with."; 
+          fi
+          if $HOUSECHESTOPEN; then
+            echo "You close the chest's lid, which falls shut with a loud thud."; 
+            HOUSECHESTOPEN=false;
+          fi
+          return;;
+      esac
+      ;;
+     * ) echo "$1? I don't see a $1!";;
+  esac
+}
+
+function inspectobject { 
+  if [ -z $1 ];then
+    if $DEBUG; then 
+      echo -e "${GREEN}[DEBUG] ${NC}No object specified."
+    fi
+    echo -e "What now?"
+    return
+  fi
+  if $DEBUG; then 
+    echo -e "${GREEN}[DEBUG] ${NC}Trying to inspect: $1"
+  fi
+  #which map are we on?
+  case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
+    "house,0,0" )
+      case $1 in
+        chest ) 
+          echo "It's chest made of wood. It looks really old and worn."
+          if ! $HOUSECHESTOPEN; then
+            echo "It's closed shut."; 
+          fi
+          if $HOUSECHESTOPEN; then
+            echo "It's currently open."; 
+          fi
+          return;;
+      esac
+      ;;
+     * ) echo "$1? I don't see a $1!";;
+  esac
+}
+
+function lookinsideobject { 
+  if [ -z $1 ];then
+    if $DEBUG; then 
+      echo -e "${GREEN}[DEBUG] ${NC}No object specified."
+    fi
+    echo -e "Inside what?"
+    return
+  fi
+  if $DEBUG; then 
+    echo -e "${GREEN}[DEBUG] ${NC}Trying to look inside: $1"
+  fi
+  #which map are we on?
+  case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
+    "house,0,0" )
+      case $1 in
+        chest ) 
+          if ! $HOUSECHESTOPEN; then
+            echo "The chest is closed, and definitely not transparant. Maybe you should try opening it first?"; 
+          fi
+          if $HOUSECHESTOPEN; then
+            echo "There's nothing inside... How anticlimactic."; 
+          fi
+          return;;
+      esac
+      ;;
+     * ) echo "$1? I don't see a $1!";;
   esac
 }
 
