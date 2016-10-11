@@ -203,6 +203,7 @@ function openobject {
             HOUSE_CHEST_OPEN=true;
           fi
         return;;
+        * ) echo "Open what now?"; return;;
       esac
     ;;
     * ) echo "$1? I don't see a $1!";;
@@ -233,6 +234,7 @@ function closeobject {
             HOUSE_CHEST_OPEN=false;
           fi
         return;;
+        * ) echo "Close what now?"; return;;
       esac
     ;;
     * ) echo "$1? I don't see a $1!";;
@@ -263,6 +265,7 @@ function inspectobject {
             echo "It's currently open.";
           fi
         return;;
+        * ) echo "I'm not sure what you're referring to."; return;;
       esac
     ;;
     * ) echo "$1? I don't see a $1!";;
@@ -297,6 +300,7 @@ function lookinsideobject {
             fi
           fi
         return;;
+      * ) echo "Look inside what?";
       esac
     ;;
     * ) echo "$1? I don't see a $1!";;
