@@ -28,21 +28,21 @@ NC='\033[0m' # No Color
 function playercommand {
   #if no command, go back to game loop
   if [ -z $1 ];then
-    if $DEBUG; then 
+    if $DEBUG; then
       echo -e "${GREEN}[DEBUG] ${NC}No command issued."
     fi
     return
   fi
   #normalise command
   #COMMAND=$(echo $1 | tr -dc '[:alnum:]' | tr '[:upper:]' '[:lower:]')i
-
+  
   #remove some middle words
   COMMAND=$(echo $COMMAND | sed 's/\sa\s/ /g' | sed 's/\sthe\s/ /g' | sed 's/\ssome\s/ /g')
-
-  if $DEBUG; then 
+  
+  if $DEBUG; then
     echo -e "${GREEN}[DEBUG] ${NC}Command issued: $COMMAND"
   fi
- 
+  
   #process player command
   WORD1=""
   WORD2=""
@@ -55,12 +55,12 @@ function playercommand {
   else
     WORD1=$COMMAND
   fi
-
+  
   case $WORD1 in
     look )
       case $WORD2 in
         "" ) getroomdescription ; return;;
-        at ) 
+        at )
           case $WORD3 in
             "" ) echo "look at what?"; return 1;;
             floor|ground ) echo "It's dirty."; return ;;
@@ -68,19 +68,19 @@ function playercommand {
             room|area ) getroomdescription; return ;;
             * ) inspectobject $WORD3; return ;;
           esac
-          ;;
-	around ) getroomdescription; return ;;
-	in|inside ) lookinsideobject $WORD3; return ;;
+        ;;
+        around ) getroomdescription; return ;;
+        in|inside ) lookinsideobject $WORD3; return ;;
         * )
       esac
-      ;;
+    ;;
     take )
       case $WORD2 in
         "" ) echo "Take what?"; return 1 ;;
         nap ) echo "You take a short nap, only to feel even worse than before."; return ;;
         * ) takeobject $WORD2; return ;;
       esac
-      ;;
+    ;;
     go )
       case $WORD2 in
         n|north )   moveroom 0 +1; return;;
@@ -90,7 +90,7 @@ function playercommand {
         in|inside ) enterroom $WORD3; return;;
         * ) echo "Go where?"; return;;
       esac
-      ;;
+    ;;
     enter ) enterroom $WORD2; return;;
     open )  openobject $WORD2; return;;
     close|shut )  closeobject $WORD2; return;;
@@ -98,22 +98,22 @@ function playercommand {
     exit )  exitroom; return;;
     quit )  echo "Goodbye." ; exit;;
     * ) echo "I beg you pardon?"; return 1;;
-  esac 
-
+  esac
+  
 }
 
-function moveroom { 
-  if $DEBUG; then 
+function moveroom {
+  if $DEBUG; then
     echo -e "${GREEN}[DEBUG] ${NC}About to move room, calculation: $CURRENTX$1,$CURRENTX$2"
   fi
   #keep last step incase we hit an invalid room
   PREVX=$CURRENTX
   PREVY=$CURRENTY
-
+  
   CURRENTX=$(echo $(($CURRENTX$1)))
   CURRENTY=$(echo $(($CURRENTY$2)))
-
-  TEST=$(getroomdescription) 
+  
+  TEST=$(getroomdescription)
   if ! [ $? -eq 0 ]; then
     #rollback if invalid room
     CURRENTX=$PREVX
@@ -124,41 +124,41 @@ function moveroom {
   getroomdescription
 }
 
-function enterroom { 
+function enterroom {
   if [ -z $1 ];then
-    if $DEBUG; then 
+    if $DEBUG; then
       echo -e "${GREEN}[DEBUG] ${NC}No room specified."
     fi
     echo -e "Where?"
     return
   fi
-  if $DEBUG; then 
+  if $DEBUG; then
     echo -e "${GREEN}[DEBUG] ${NC}Trying to enter room: $1"
   fi
   #which map are we on?
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
     "overworld,1,0" )
       case $1 in
-        house ) warp house 0 0; return;; 
+        house ) warp house 0 0; return;;
       esac
-      ;;
-     * ) echo "There is no $1 here...";;
+    ;;
+    * ) echo "There is no $1 here...";;
   esac
 }
 
-function exitroom { 
-  if $DEBUG; then 
+function exitroom {
+  if $DEBUG; then
     echo -e "${GREEN}[DEBUG] ${NC}Trying to exit room: $CURRENTMAP,$CURRENTX,$CURRENTY"
   fi
   #which map are we on?
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
     "house,0,0" ) warp overworld 1 0;;
-     * ) echo "We're already outside!";;
+    * ) echo "We're already outside!";;
   esac
 }
 function warp {
-  if $DEBUG; then 
-     echo -e "${GREEN}[DEBUG] ${NC}Warping to $1,$2,$3"
+  if $DEBUG; then
+    echo -e "${GREEN}[DEBUG] ${NC}Warping to $1,$2,$3"
   fi
   CURRENTMAP=$1
   CURRENTX=$2
@@ -175,165 +175,165 @@ function getroomdescription {
     "overworld,-1,0" ) echo "You find yourself on a dead end. There is a road to the west." ; return ;;
     "overworld,1,0" ) echo "You find yourself on a road leading to a house. There is a road to the east." ; return ;;
     "house,0,0" ) echo "You're inside a small abandoned house. It's empty, except for a chest in the middle of the room." ; return ;;
-     * ) echo -e "${RED}[ERROR] ${NC}Invalid room. You should not be here." ; return 1;;
+    * ) echo -e "${RED}[ERROR] ${NC}Invalid room. You should not be here." ; return 1;;
   esac
 }
 
-function openobject { 
+function openobject {
   if [ -z $1 ];then
-    if $DEBUG; then 
+    if $DEBUG; then
       echo -e "${GREEN}[DEBUG] ${NC}No object specified."
     fi
     echo -e "Open what?"
     return
   fi
-  if $DEBUG; then 
+  if $DEBUG; then
     echo -e "${GREEN}[DEBUG] ${NC}Trying to open: $1"
   fi
   #which map are we on?
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
     "house,0,0" )
       case $1 in
-        chest ) 
+        chest )
           if $HOUSE_CHEST_OPEN; then
-            echo "It's already opened!"; 
+            echo "It's already opened!";
           fi
           if ! $HOUSE_CHEST_OPEN; then
-            echo "With a creak of the tired hinges, the chest opens."; 
+            echo "With a creak of the tired hinges, the chest opens.";
             HOUSE_CHEST_OPEN=true;
           fi
-          return;;
+        return;;
       esac
-      ;;
-     * ) echo "$1? I don't see a $1!";;
+    ;;
+    * ) echo "$1? I don't see a $1!";;
   esac
 }
 
-function closeobject { 
+function closeobject {
   if [ -z $1 ];then
-    if $DEBUG; then 
+    if $DEBUG; then
       echo -e "${GREEN}[DEBUG] ${NC}No object specified."
     fi
     echo -e "Close what?"
     return
   fi
-  if $DEBUG; then 
+  if $DEBUG; then
     echo -e "${GREEN}[DEBUG] ${NC}Trying to close: $1"
   fi
   #which map are we on?
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
     "house,0,0" )
       case $1 in
-        chest ) 
+        chest )
           if ! $HOUSE_CHEST_OPEN; then
-            echo "It's not open to begin with."; 
+            echo "It's not open to begin with.";
           fi
           if $HOUSE_CHEST_OPEN; then
-            echo "You close the chest's lid, which falls shut with a loud thud."; 
+            echo "You close the chest's lid, which falls shut with a loud thud.";
             HOUSE_CHEST_OPEN=false;
           fi
-          return;;
+        return;;
       esac
-      ;;
-     * ) echo "$1? I don't see a $1!";;
+    ;;
+    * ) echo "$1? I don't see a $1!";;
   esac
 }
 
-function inspectobject { 
+function inspectobject {
   if [ -z $1 ];then
-    if $DEBUG; then 
+    if $DEBUG; then
       echo -e "${GREEN}[DEBUG] ${NC}No object specified."
     fi
     echo -e "What now?"
     return
   fi
-  if $DEBUG; then 
+  if $DEBUG; then
     echo -e "${GREEN}[DEBUG] ${NC}Trying to inspect: $1"
   fi
   #which map are we on?
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
     "house,0,0" )
       case $1 in
-        chest ) 
+        chest )
           echo "It's chest made of wood. It looks really old and worn."
           if ! $HOUSE_CHEST_OPEN; then
-            echo "It's closed shut."; 
+            echo "It's closed shut.";
           fi
           if $HOUSE_CHEST_OPEN; then
-            echo "It's currently open."; 
+            echo "It's currently open.";
           fi
-          return;;
+        return;;
       esac
-      ;;
-     * ) echo "$1? I don't see a $1!";;
+    ;;
+    * ) echo "$1? I don't see a $1!";;
   esac
 }
 
-function lookinsideobject { 
+function lookinsideobject {
   if [ -z $1 ];then
-    if $DEBUG; then 
+    if $DEBUG; then
       echo -e "${GREEN}[DEBUG] ${NC}No object specified."
     fi
     echo -e "Inside what?"
     return
   fi
-  if $DEBUG; then 
+  if $DEBUG; then
     echo -e "${GREEN}[DEBUG] ${NC}Trying to look inside: $1"
   fi
   #which map are we on?
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
     "house,0,0" )
       case $1 in
-        chest ) 
+        chest )
           if ! $HOUSE_CHEST_OPEN; then
-            echo "The chest is closed, and definitely not transparant. Maybe you should try opening it first?"; 
+            echo "The chest is closed, and definitely not transparant. Maybe you should try opening it first?";
           fi
           if $HOUSE_CHEST_OPEN; then
-		echo "You peer into the chest with hopeful eyes..."
-		if $HAS_SWORD; then
-			echo "There's nothing in there but dirt."
-		else
-			echo "There's a shortsword in there! It's obviously well used, but it still looks sharp."
-		fi
+            echo "You peer into the chest with hopeful eyes..."
+            if $HAS_SWORD; then
+              echo "There's nothing in there but dirt."
+            else
+              echo "There's a shortsword in there! It's obviously well used, but it still looks sharp."
+            fi
           fi
-          return;;
+        return;;
       esac
-      ;;
-     * ) echo "$1? I don't see a $1!";;
+    ;;
+    * ) echo "$1? I don't see a $1!";;
   esac
 }
 
-function takeobject { 
+function takeobject {
   if [ -z $1 ];then
-    if $DEBUG; then 
+    if $DEBUG; then
       echo -e "${GREEN}[DEBUG] ${NC}No object specified."
     fi
     echo -e "Take what?"
     return
   fi
-  if $DEBUG; then 
+  if $DEBUG; then
     echo -e "${GREEN}[DEBUG] ${NC}Trying to take: $1"
   fi
   #which map are we on?
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
     "house,0,0" )
       case $1 in
-      sword ) if $HOUSE_CHEST_OPEN; then
-                if ! $HAS_SWORD; then
-                  HAS_SWORD=true;
-                  echo "You pick up the sword from the chest. It makes a pleasing sshinggg sound while doing so.";
-		else
-		  echo "There was only one... Don't get greedy."
-		fi
-              else
-                echo "I can't see a sword right now.";
-              fi
-	      return;
-      ;;
-      * ) echo "I can't see a $1 right now." ;; 
+        sword ) if $HOUSE_CHEST_OPEN; then
+            if ! $HAS_SWORD; then
+              HAS_SWORD=true;
+              echo "You pick up the sword from the chest. It makes a pleasing sshinggg sound while doing so.";
+            else
+              echo "There was only one... Don't get greedy."
+            fi
+          else
+            echo "I can't see a sword right now.";
+          fi
+          return;
+        ;;
+        * ) echo "I can't see a $1 right now." ;;
       esac
-     ;;
-     * ) echo "$1? I don't see a $1!";;
+    ;;
+    * ) echo "$1? I don't see a $1!";;
   esac
 }
 
@@ -369,8 +369,8 @@ playercommand $COMMAND
 while $GAMELOOP; do
   read -rp ">" COMMAND
   if playercommand $COMMAND; then echo "What will you do?"; fi
-
-  if $DEBUG; then 
+  
+  if $DEBUG; then
     echo -e "${GREEN}[DEBUG] ${NC}Player location: $CURRENTMAP,$CURRENTX,$CURRENTY"
   fi
 done
