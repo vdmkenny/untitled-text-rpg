@@ -6,7 +6,7 @@
 #Main Vars
 GAMENAME="Placeholder title"
 VERSION="v0.0.2"
-DEBUG=true
+DEBUG=false
 GAMELOOP=true
 
 #Game Vars
@@ -18,7 +18,7 @@ HOUSE_CHEST_OPEN=false
 HOUSE_DOOR_OPEN=false
 HAS_SWORD=false
 HAS_CHEST_KEY=false
-HAS_FISHING_POLE=true
+HAS_FISHING_POLE=false
 IS_CHEST_UNLOCKED=false
 
 #Colors
