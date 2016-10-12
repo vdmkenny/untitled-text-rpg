@@ -8,6 +8,7 @@ GAMENAME="Placeholder title"
 VERSION="v0.0.2"
 DEBUG=false
 GAMELOOP=true
+PROMPT="${BLUE}>${NC}"
 
 #Game Vars
 PLAYERNAME=""
@@ -468,7 +469,7 @@ function takeobject {
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
     "house,0,0" )
       case $1 in
-        sword ) if $HOUSE_CHEST_OPEN; then
+        shortsword|sword ) if $HOUSE_CHEST_OPEN; then
             if ! $HAS_SWORD; then
               HAS_SWORD=true;
               echo "You pick up the sword from the chest. It makes a pleasing sshinggg sound while doing so.";
@@ -569,12 +570,12 @@ echo
 
 #get playername
 echo "What is your name, adventurer?"
-read -rp ">" PLAYERNAME
+read -rp "$PROMPT" PLAYERNAME
 
 #if playername is null, repeat
 while [ -z $PLAYERNAME ]; do
   echo "I didn't quite hear that..."
-  read -rp ">" PLAYERNAME
+  read -rp "$PROMPT" PLAYERNAME
 done
 #make playername blue always
 PLAYERNAME="${BLUE}$PLAYERNAME${NC}"
@@ -583,10 +584,10 @@ echo -e "Hello, $PLAYERNAME!"
 
 #Main gameloop
 echo "What will you do?"
-read -rp ">" COMMAND
+read -rp "$PROMPT" COMMAND
 playercommand $COMMAND
 while $GAMELOOP; do
-  read -rp ">" COMMAND
+  read -rp "$PROMPT" COMMAND
   if playercommand $COMMAND; then echo "What will you do?"; fi
   
   if $DEBUG; then
