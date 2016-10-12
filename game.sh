@@ -116,7 +116,7 @@ function playercommand {
     ;;
     inventory )  showinventory; return;;
     quit )  echo "Goodbye." ; exit;;
-    * ) echo "I beg you pardon?"; return 1;;
+    * ) echo "I beg your pardon?"; return 1;;
   esac
   
 }
