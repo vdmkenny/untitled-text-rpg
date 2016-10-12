@@ -327,9 +327,9 @@ function inspectobject {
     ;;
     "overworld,0,-1" )
       case $1 in
-	well )
-	  echo "It's an old, dried up well. Even the bucket is long gone.";
-	;;
+        well )
+          echo "It's an old, dried up well. Even the bucket is long gone.";
+        ;;
         * ) echo "I'm not sure what you're referring to."; return;;
       esac
     ;;
@@ -370,9 +370,9 @@ function lookinsideobject {
     ;;
     "overworld,0,-1" )
       case $1 in
-	well )
-	  echo "You peer down the well. As expected it's all dried up. If you look closely, you can just about see something shiny down there.";
-	;;
+        well )
+          echo "You peer down the well. As expected it's all dried up. If you look closely, you can just about see something shiny down there.";
+        ;;
         * ) echo "I'm not sure what you're referring to."; return;;
       esac
     ;;
