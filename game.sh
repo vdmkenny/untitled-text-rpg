@@ -152,7 +152,6 @@ function enterroom {
       case $1 in
         house|cabin )
           if $HOUSE_DOOR_OPEN; then
-            echo "You exit the cabin."
             warp house 0 0; return;
           else
             echo "The door is closed.";
@@ -171,6 +170,7 @@ function exitroom {
   #which map are we on?
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
     "house,0,0" ) 	if $HOUSE_DOOR_OPEN; then
+        echo "You exit the cabin."
         warp overworld 1 0;
       else
         echo "You can't walk through doors, dummy.";
