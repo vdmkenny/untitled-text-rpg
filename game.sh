@@ -15,6 +15,7 @@ CURRENTMAP="overworld"
 CURRENTX="0"
 CURRENTY="0"
 HOUSE_CHEST_OPEN=false
+HOUSE_DOOR_OPEN=false
 HAS_SWORD=false
 
 #Colors
@@ -139,7 +140,13 @@ function enterroom {
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
     "overworld,1,0" )
       case $1 in
-        house ) warp house 0 0; return;;
+        house )
+          if $HOUSE_DOOR_OPEN; then
+            warp house 0 0; return;
+          else
+            echo "The door is closed.";
+          fi
+        ;;
       esac
     ;;
     * ) echo "There is no $1 here...";;
@@ -152,7 +159,13 @@ function exitroom {
   fi
   #which map are we on?
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
-    "house,0,0" ) warp overworld 1 0;;
+    "house,0,0" ) 	if $HOUSE_DOOR_OPEN; then
+        warp overworld 1 0;
+      else
+        echo "You can't walk through doors, dummy.";
+      fi
+    ;;
+    
     * ) echo "We're already outside!";;
   esac
 }
@@ -203,6 +216,29 @@ function openobject {
             HOUSE_CHEST_OPEN=true;
           fi
         return;;
+        door )
+          if $HOUSE_DOOR_OPEN; then
+            echo "It's wide open.";
+          fi
+          if ! $HOUSE_DOOR_OPEN; then
+            echo "The door sticks quite badly, but you managed to push it open.";
+            HOUSE_DOOR_OPEN=true;
+          fi
+        return;;
+        * ) echo "Open what now?"; return;;
+      esac
+    ;;
+    "overworld,1,0" )
+      case $1 in
+        door )
+          if $HOUSE_DOOR_OPEN; then
+            echo "It's wide open.";
+          fi
+          if ! $HOUSE_DOOR_OPEN; then
+            echo "The door sticks quite badly, but you managed to push it open.";
+            HOUSE_DOOR_OPEN=true;
+          fi
+        return;;
         * ) echo "Open what now?"; return;;
       esac
     ;;
@@ -234,7 +270,28 @@ function closeobject {
             HOUSE_CHEST_OPEN=false;
           fi
         return;;
-        * ) echo "Close what now?"; return;;
+        door )
+          if $HOUSE_DOOR_OPEN; then
+            echo "You close the door like a civilised person.";
+            HOUSE_DOOR_OPEN=false
+          else
+            echo "It's already closed!";
+          fi
+        return;;
+        * ) echo "Open what now?"; return;;
+      esac
+    ;;
+    "overworld,1,0" )
+      case $1 in
+        door )
+          if $HOUSE_DOOR_OPEN; then
+            echo "You close the door like a civilised person.";
+            HOUSE_DOOR_OPEN=false
+          else
+            echo "It's already closed!";
+          fi
+        return;;
+        * ) echo "Open what now?"; return;;
       esac
     ;;
     * ) echo "$1? I don't see a $1!";;
@@ -300,7 +357,7 @@ function lookinsideobject {
             fi
           fi
         return;;
-      * ) echo "Look inside what?";
+        * ) echo "Look inside what?";
       esac
     ;;
     * ) echo "$1? I don't see a $1!";;
