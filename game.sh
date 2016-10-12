@@ -6,7 +6,7 @@
 #Main Vars
 GAMENAME="Placeholder title"
 VERSION="v0.0.2"
-DEBUG=false
+DEBUG=true
 GAMELOOP=true
 
 #Game Vars
@@ -19,6 +19,7 @@ HOUSE_DOOR_OPEN=false
 HAS_SWORD=false
 HAS_CHEST_KEY=false
 HAS_FISHING_POLE=false
+IS_CHEST_UNLOCKED=false
 
 #Colors
 BLUE='\033[0;34m'
@@ -40,7 +41,7 @@ function playercommand {
   #COMMAND=$(echo $1 | tr -dc '[:alnum:]' | tr '[:upper:]' '[:lower:]')i
   
   #remove some middle words
-  COMMAND=$(echo $COMMAND | sed 's/\sa\s/ /g' | sed 's/\sthe\s/ /g' | sed 's/\ssome\s/ /g')
+  COMMAND=$(echo $COMMAND | sed 's/\sa\s/ /g' | sed 's/\sthe\s/ /g' | sed 's/\ssome\s/ /g' | sed 's/\son\s/ /g')
   
   if $DEBUG; then
     echo -e "${GREEN}[DEBUG] ${NC}Command issued: $COMMAND"
@@ -98,6 +99,13 @@ function playercommand {
     open )  openobject $WORD2; return;;
     close|shut )  closeobject $WORD2; return;;
     inspect )  inspectobject $WORD2; return;;
+    use )  useobject $WORD2 $WORD3; return;;
+    fish ) if [[ $WORD2 == "in" ]] || [[ $WORD2 == "down" ]]; then 
+            useobject pole $WORD3; return
+          else
+            useobject pole $WORD2; return
+          fi
+    ;;
     exit )  exitroom; return;;
     quit )  echo "Goodbye." ; exit;;
     * ) echo "I beg you pardon?"; return 1;;
@@ -144,6 +152,7 @@ function enterroom {
       case $1 in
         house|cabin )
           if $HOUSE_DOOR_OPEN; then
+            echo "You exit the cabin."
             warp house 0 0; return;
           else
             echo "The door is closed.";
@@ -210,14 +219,23 @@ function openobject {
     "house,0,0" )
       case $1 in
         chest )
-          if $HOUSE_CHEST_OPEN; then
-            echo "It's already opened!";
+          if $HAS_CHEST_KEY; then
+            if ! $IS_CHEST_UNLOCKED; then
+              IS_CHEST_UNLOCKED=true
+              echo "You unlock the chest using the key."
+            fi
+            if $HOUSE_CHEST_OPEN; then
+              echo "It's already opened!";
+            fi
+            if ! $HOUSE_CHEST_OPEN; then
+              echo "With a creak of the tired hinges, the chest opens.";
+              HOUSE_CHEST_OPEN=true;
+            fi
+        return
+          else
+            echo "You try to open the chest, but notice it is locked securely."
           fi
-          if ! $HOUSE_CHEST_OPEN; then
-            echo "With a creak of the tired hinges, the chest opens.";
-            HOUSE_CHEST_OPEN=true;
-          fi
-        return;;
+        ;;
         door )
           if $HOUSE_DOOR_OPEN; then
             echo "It's wide open.";
@@ -435,6 +453,51 @@ function takeobject {
       esac
     ;;
     * ) echo "$1? I don't see a $1!";;
+  esac
+}
+
+function useobject {
+  if [ -z $1 ];then
+    if $DEBUG; then
+      echo -e "${GREEN}[DEBUG] ${NC}No use object specified."
+    fi
+    echo -e "Use what?"
+    return
+  fi
+  if [ -z $2 ];then
+    if $DEBUG; then
+      echo -e "${GREEN}[DEBUG] ${NC}No object to use on specified."
+    fi
+    echo -e "Use it on what?"
+    return 1
+  fi
+  if $DEBUG; then
+    echo -e "${GREEN}[DEBUG] ${NC}Trying to use $1 on $2"
+  fi
+  #which item are we using?
+  case "$1" in
+    fishing|pole|rod ) 
+      case $2 in
+        well|water )
+        if $HAS_FISHING_POLE; then
+          if [[ "$CURRENTMAP,$CURRENTX,$CURRENTY" == "overworld,0,-1" ]]; then
+            if ! $HAS_CHEST_KEY; then
+              HAS_CHEST_KEY=true
+              echo "You throw your fishing line down the well... reeling in a shiny key!"
+            else 
+              echo "You throw your fishing line down the well... But it seems there's nothing left to fish."
+            fi
+          else
+            echo "There's no well around."
+          fi
+        else
+          echo "You don't have a fishing pole!";
+        fi
+        ;;
+        * ) echo "That sounds fun... but I better not."
+      esac   
+    ;;
+    * ) echo "A $1? I don't think you have one of those..." ;;
   esac
 }
 
