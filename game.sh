@@ -79,7 +79,7 @@ function playercommand {
         * )
       esac
     ;;
-    take )
+    grab|take )
       case $WORD2 in
         "" ) echo "Take what?"; return 1 ;;
         nap ) echo "You take a short nap, only to feel even worse than before."; return ;;
