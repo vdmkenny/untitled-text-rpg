@@ -6,7 +6,7 @@
 #Main Vars
 GAMENAME="Placeholder title"
 VERSION="v0.0.2"
-DEBUG=false
+DEBUG=true
 GAMELOOP=true
 
 #Game Vars
@@ -18,7 +18,7 @@ HOUSE_CHEST_OPEN=false
 HOUSE_DOOR_OPEN=false
 HAS_SWORD=false
 HAS_CHEST_KEY=false
-HAS_FISHING_POLE=false
+HAS_FISHING_POLE=true
 IS_CHEST_UNLOCKED=false
 
 #Colors
@@ -56,6 +56,7 @@ function playercommand {
     WORD1=$(echo $COMMAND | cut -d " " -f 1)
     WORD2=$(echo $COMMAND | cut -d " " -f 2)
     WORD3=$(echo $COMMAND | cut -d " " -f 3)
+    WORD4=$(echo $COMMAND | cut -d " " -f 4)
   else
     WORD1=$COMMAND
   fi
@@ -99,12 +100,12 @@ function playercommand {
     open )  openobject $WORD2; return;;
     close|shut )  closeobject $WORD2; return;;
     inspect )  inspectobject $WORD2; return;;
-    use )  useobject $WORD2 $WORD3; return;;
-    fish ) if [[ $WORD2 == "in" ]] || [[ $WORD2 == "down" ]]; then 
-            useobject pole $WORD3; return
-          else
-            useobject pole $WORD2; return
-          fi
+    use )  useobject $WORD2 $WORD3 $WORD4; return;;
+    fish ) if [[ $WORD2 == "in" ]] || [[ $WORD2 == "down" ]]; then
+        useobject pole $WORD3; return
+      else
+        useobject pole $WORD2; return
+      fi
     ;;
     exit )  exitroom; return;;
     quit )  echo "Goodbye." ; exit;;
@@ -231,11 +232,24 @@ function openobject {
               echo "With a creak of the tired hinges, the chest opens.";
               HOUSE_CHEST_OPEN=true;
             fi
-        return
+            return
           else
             echo "You try to open the chest, but notice it is locked securely."
           fi
         ;;
+        lock )
+          if $IS_CHEST_UNLOCKED; then
+            echo "It's already open!";
+          fi
+          if ! $IS_CHEST_UNLOCKED; then
+            if ! $HAS_CHEST_KEY; then
+              echo "You'll need a key for that.";
+            else
+              echo "You unlock the chest using the key.";
+              IS_CHEST_UNLOCKED=true
+            fi
+          fi
+        return;;
         door )
           if $HOUSE_DOOR_OPEN; then
             echo "It's wide open.";
@@ -343,12 +357,12 @@ function inspectobject {
           fi
         return;;
         table ) echo "It doesn't look very sturdy... or sanitary, for that matter.";;
-        fishing|supplies ) 
-        	if ! $HAS_FISHING_POLE; then
-                	echo "A fishing pole and some lures. It's seen better days, but you can probably still catch fish with it."
-	        else
-                        echo "A pile of used fishing nick-nacks. After taking the pole, there's nothing useful left."
-                fi
+        fishing|supplies )
+          if ! $HAS_FISHING_POLE; then
+            echo "A fishing pole and some lures. It's seen better days, but you can probably still catch fish with it."
+          else
+            echo "A pile of used fishing nick-nacks. After taking the pole, there's nothing useful left."
+          fi
         ;;
         clown|painting ) echo "Creepy... It looks like it's eyes are following wherever you go in the room. I'm sure it's just an illusion.";;
         * ) echo "I'm not sure what you're referring to."; return;;
@@ -403,7 +417,7 @@ function lookinsideobject {
           echo "You peer down the well. As expected it's all dried up."
           if ! $HAS_CHEST_KEY; then
             echo "If you look closely, you can just about see something shiny down there.";
-	  fi
+          fi
         ;;
         * ) echo "I'm not sure what you're referring to."; return;;
       esac
@@ -440,15 +454,16 @@ function takeobject {
           return;
         ;;
         fishing|pole|rod )
-            if ! $HAS_FISHING_POLE; then
-              HAS_FISHING_POLE=true;
-              echo "You take the fishing pole. You're tempted to swing it at something, but resist the urge.";
-            else
-              echo "There's nothing useful left to take."
-            fi
+          if ! $HAS_FISHING_POLE; then
+            HAS_FISHING_POLE=true;
+            echo "You take the fishing pole. You're tempted to swing it at something, but resist the urge.";
+          else
+            echo "There's nothing useful left to take."
+          fi
           return;
         ;;
         chest ) echo "It seems a bit heavy for that.";;
+        lure* ) echo "I don't think I want those right now.";;
         * ) echo "I can't see a $1 right now." ;;
       esac
     ;;
@@ -457,6 +472,11 @@ function takeobject {
 }
 
 function useobject {
+  echo "arguments: $1 $2 $3"
+  
+  OBJECT1=$1
+  OBJECT2=$2
+  
   if [ -z $1 ];then
     if $DEBUG; then
       echo -e "${GREEN}[DEBUG] ${NC}No use object specified."
@@ -471,31 +491,39 @@ function useobject {
     echo -e "Use it on what?"
     return 1
   fi
+  #incase of "fishing pole or fishing rod"
+  if [[ "$2" == "pole" ]] || [[ "$2" == "rod" ]]; then
+    if $DEBUG; then
+      echo -e "${GREEN}[DEBUG] ${NC}Shifting object arguments because of fishing pole."
+    fi
+    OBJECT1=$2
+    OBJECT2=$3
+  fi
   if $DEBUG; then
-    echo -e "${GREEN}[DEBUG] ${NC}Trying to use $1 on $2"
+    echo -e "${GREEN}[DEBUG] ${NC}Trying to use $OBJECT1 on $OBJECT2"
   fi
   #which item are we using?
-  case "$1" in
-    fishing|pole|rod ) 
-      case $2 in
+  case "$OBJECT1" in
+    pole|rod )
+      case $OBJECT2 in
         well|water )
-        if $HAS_FISHING_POLE; then
-          if [[ "$CURRENTMAP,$CURRENTX,$CURRENTY" == "overworld,0,-1" ]]; then
-            if ! $HAS_CHEST_KEY; then
-              HAS_CHEST_KEY=true
-              echo "You throw your fishing line down the well... reeling in a shiny key!"
-            else 
-              echo "You throw your fishing line down the well... But it seems there's nothing left to fish."
+          if $HAS_FISHING_POLE; then
+            if [[ "$CURRENTMAP,$CURRENTX,$CURRENTY" == "overworld,0,-1" ]]; then
+              if ! $HAS_CHEST_KEY; then
+                HAS_CHEST_KEY=true
+                echo "You throw your fishing line down the well... reeling in a shiny key!"
+              else
+                echo "You throw your fishing line down the well... But it seems there's nothing left to fish."
+              fi
+            else
+              echo "There's no well around."
             fi
           else
-            echo "There's no well around."
+            echo "You don't have a fishing pole!";
           fi
-        else
-          echo "You don't have a fishing pole!";
-        fi
         ;;
         * ) echo "That sounds fun... but I better not."
-      esac   
+      esac
     ;;
     * ) echo "A $1? I don't think you have one of those..." ;;
   esac
