@@ -140,7 +140,7 @@ function enterroom {
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
     "overworld,1,0" )
       case $1 in
-        house )
+        house|cabin )
           if $HOUSE_DOOR_OPEN; then
             warp house 0 0; return;
           else
@@ -186,8 +186,8 @@ function getroomdescription {
     "overworld,0,1" ) echo "You find yourself on a dead end. There is a road to the south." ; return ;;
     "overworld,0,-1" ) echo "You're on a dead end, leading to an old water well. There is a road to the north." ; return ;;
     "overworld,-1,0" ) echo "You find yourself on a dead end. There is a road to the west." ; return ;;
-    "overworld,1,0" ) echo "You find yourself on a road leading to a house. There is a road to the east." ; return ;;
-    "house,0,0" ) echo "You're inside a small abandoned house. It's empty, except for a chest in the middle of the room." ; return ;;
+    "overworld,1,0" ) echo "You find yourself on a road leading to a derelict cabin. There is a road to the east." ; return ;;
+    "house,0,0" ) echo "You're inside a small abandoned cabin. It's mostly empty, but there's an rickety table in the center of the room with a small chest on it. There's also some fishing supplies in the corner, and a very disturbing painting of a clown on the wall." ; return ;;
     * ) echo -e "${RED}[ERROR] ${NC}Invalid room. You should not be here." ; return 1;;
   esac
 }
