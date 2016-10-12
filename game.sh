@@ -71,7 +71,7 @@ function playercommand {
           esac
         ;;
         around ) getroomdescription; return ;;
-        in|inside ) lookinsideobject $WORD3; return ;;
+        in|inside|down ) lookinsideobject $WORD3; return ;;
         * )
       esac
     ;;
@@ -184,7 +184,7 @@ function getroomdescription {
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
     "overworld,0,0" ) echo "You find yourself on a crossroad. There is a road in each direction." ; return ;;
     "overworld,0,1" ) echo "You find yourself on a dead end. There is a road to the south." ; return ;;
-    "overworld,0,-1" ) echo "You find yourself on a dead end. There is a road to the north." ; return ;;
+    "overworld,0,-1" ) echo "You're on a dead end, leading to an old water well. There is a road to the north." ; return ;;
     "overworld,-1,0" ) echo "You find yourself on a dead end. There is a road to the west." ; return ;;
     "overworld,1,0" ) echo "You find yourself on a road leading to a house. There is a road to the east." ; return ;;
     "house,0,0" ) echo "You're inside a small abandoned house. It's empty, except for a chest in the middle of the room." ; return ;;
@@ -325,6 +325,14 @@ function inspectobject {
         * ) echo "I'm not sure what you're referring to."; return;;
       esac
     ;;
+    "overworld,0,-1" )
+      case $1 in
+	well )
+	  echo "It's an old, dried up well. Even the bucket is long gone.";
+	;;
+        * ) echo "I'm not sure what you're referring to."; return;;
+      esac
+    ;;
     * ) echo "$1? I don't see a $1!";;
   esac
 }
@@ -358,6 +366,14 @@ function lookinsideobject {
           fi
         return;;
         * ) echo "Look inside what?";
+      esac
+    ;;
+    "overworld,0,-1" )
+      case $1 in
+	well )
+	  echo "You peer down the well. As expected it's all dried up. If you look closely, you can just about see something shiny down there.";
+	;;
+        * ) echo "I'm not sure what you're referring to."; return;;
       esac
     ;;
     * ) echo "$1? I don't see a $1!";;
