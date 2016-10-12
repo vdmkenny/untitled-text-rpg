@@ -108,10 +108,37 @@ function playercommand {
       fi
     ;;
     exit )  exitroom; return;;
+    show )
+      case $WORD2 in
+       inventory ) showinventory;;
+       * ) echo "Show what?";;
+      esac
+    ;;
+    inventory )  showinventory; return;;
     quit )  echo "Goodbye." ; exit;;
     * ) echo "I beg you pardon?"; return 1;;
   esac
   
+}
+
+function showinventory {
+  HAS_SOMETHING=false
+  echo "In your possession, you have:"
+  if $HAS_SWORD; then
+    echo " * A short sword"
+    HAS_SOMETHING=true
+  fi
+  if $HAS_FISHING_POLE; then
+    echo " * A fishing pole"
+    HAS_SOMETHING=true
+  fi 
+  if $HAS_CHEST_KEY; then
+    echo " * A key"
+    HAS_SOMETHING=true
+  fi
+  if ! $HAS_SOMETHING; then
+    echo "...nothing!"
+  fi
 }
 
 function moveroom {
