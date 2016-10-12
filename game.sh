@@ -17,6 +17,8 @@ CURRENTY="0"
 HOUSE_CHEST_OPEN=false
 HOUSE_DOOR_OPEN=false
 HAS_SWORD=false
+HAS_CHEST_KEY=false
+HAS_FISHING_POLE=false
 
 #Colors
 BLUE='\033[0;34m'
@@ -322,6 +324,15 @@ function inspectobject {
             echo "It's currently open.";
           fi
         return;;
+        table ) echo "It doesn't look very sturdy... or sanitary, for that matter.";;
+        fishing|supplies ) 
+        	if ! $HAS_FISHING_POLE; then
+                	echo "A fishing pole and some lures. It's seen better days, but you can probably still catch fish with it."
+	        else
+                        echo "A pile of used fishing nick-nacks. After taking the pole, there's nothing useful left."
+                fi
+        ;;
+        clown|painting ) echo "Creepy... It looks like it's eyes are following wherever you go in the room. I'm sure it's just an illusion.";;
         * ) echo "I'm not sure what you're referring to."; return;;
       esac
     ;;
@@ -371,7 +382,10 @@ function lookinsideobject {
     "overworld,0,-1" )
       case $1 in
         well )
-          echo "You peer down the well. As expected it's all dried up. If you look closely, you can just about see something shiny down there.";
+          echo "You peer down the well. As expected it's all dried up."
+          if ! $HAS_CHEST_KEY; then
+            echo "If you look closely, you can just about see something shiny down there.";
+	  fi
         ;;
         * ) echo "I'm not sure what you're referring to."; return;;
       esac
@@ -407,6 +421,16 @@ function takeobject {
           fi
           return;
         ;;
+        fishing|pole|rod )
+            if ! $HAS_FISHING_POLE; then
+              HAS_FISHING_POLE=true;
+              echo "You take the fishing pole. You're tempted to swing it at something, but resist the urge.";
+            else
+              echo "There's nothing useful left to take."
+            fi
+          return;
+        ;;
+        chest ) echo "It seems a bit heavy for that.";;
         * ) echo "I can't see a $1 right now." ;;
       esac
     ;;
