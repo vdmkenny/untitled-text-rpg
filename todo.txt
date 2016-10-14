@@ -9,7 +9,7 @@ Things to do:
 *Add a "cave" behind the wolf.
     *A series of rooms in a maze-like pattern that all have the same description, e.g. "You stumble about in the darkness."
     *Only have descriptions of what's around you if player has a lit lantern
-    *Hide a lantern and a way to light it in two different locations, possibly behind puzzles similar to the sword puzzle.
+    *Hide a lantern and a way to light it in two different locations (not in the cave), possibly behind puzzles similar to the sword puzzle.
     *Have a cave room where you fall to your death if you're doing it blind, make this room avoidable to get through the cave
     *The cave needs an exit to a different area.
     
