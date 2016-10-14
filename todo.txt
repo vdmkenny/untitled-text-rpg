@@ -1,12 +1,12 @@
 Things to do:
 ------------
 
-*Add a path with a wolf on.
-    *You can't do further down the path without killing the wolf
-    *You need the sword to kill the wolf
-    *Any attempt to kill the wolf without the sword will result in the player dying.
+*Add a path with a goblin on.
+    *You can't do further down the path without killing the goblin
+    *You need the sword to kill the goblin
+    *Any attempt to kill the goblin without the sword will result in the player dying.
 
-*Add a "cave" behind the wolf.
+*Add a "cave" behind the goblin.
     *A series of rooms in a maze-like pattern that all have the same description, e.g. "You stumble about in the darkness."
     *Only have descriptions of what's around you if player has a lit lantern
     *Hide a lantern and a way to light it in two different locations (not in the cave), possibly behind puzzles similar to the sword puzzle.
