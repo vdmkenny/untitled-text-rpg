@@ -51,6 +51,8 @@ function loadgame {
       echo -e "${GREEN}[DEBUG] ${NC}Loaded save file $SAVEFILE"
     fi
     echo Savegame loaded.
+    echo "Hello again, $PLAYERNAME!"
+    getroomdescription
     NEWGAME=false
   else 
     if $DEBUG; then
@@ -58,7 +60,6 @@ function loadgame {
     fi
     echo No savegame found!
   fi
-  getroomdescription
 }
 
 function savegame {
@@ -657,8 +658,6 @@ if $NEWGAME; then
     read -rp "$PROMPT" PLAYERNAME
   done
   echo -e "Hello, $PLAYERNAME!"
-else
-  echo "Hello again, $PLAYERNAME!"
 fi
 
 #Main gameloop
