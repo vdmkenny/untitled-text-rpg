@@ -6,7 +6,7 @@
 #Main Vars
 GAMENAME="Placeholder title"
 VERSION="v0.0.3"
-DEBUG=false
+DEBUG=true
 GAMELOOP=true
 PROMPT="${BLUE}>${NC}"
 SAVEFILE="./savegame"
@@ -555,6 +555,12 @@ function takeobject {
         chest ) echo "It seems a bit heavy for that.";;
         lure* ) echo "I don't think I want those right now.";;
         * ) echo "I can't see a $1 right now." ;;
+      esac
+    ;;
+    "overworld,0,-1" ) 
+      case $1 in
+        shiny|key ) echo "The well it too deep, you can't reach it!" ;;
+        * ) echo "$1? I don't see a $1!" ;;
       esac
     ;;
     * ) echo "$1? I don't see a $1!";;
