@@ -85,6 +85,8 @@ function savegame {
   echo HAS_CHEST_KEY=$HAS_CHEST_KEY>> $SAVEFILE 
   echo HAS_FISHING_POLE=$HAS_FISHING_POLE>> $SAVEFILE 
   echo IS_CHEST_UNLOCKED=$IS_CHEST_UNLOCKED>> $SAVEFILE 
+ 
+  echo "Your progress was saved."
 }
 
 function playercommand {
@@ -640,6 +642,8 @@ if $NEWGAME; then
     read -rp "$PROMPT" PLAYERNAME
   done
   echo -e "Hello, $PLAYERNAME!"
+else
+  echo "Hello again, $PLAYERNAME!"
 fi
 
 #Main gameloop
