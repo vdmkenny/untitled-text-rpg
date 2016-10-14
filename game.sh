@@ -6,7 +6,7 @@
 #Main Vars
 GAMENAME="Placeholder title"
 VERSION="v0.0.3"
-DEBUG=true
+DEBUG=false
 GAMELOOP=true
 PROMPT="${BLUE}>${NC}"
 SAVEFILE="./savegame"
