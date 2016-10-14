@@ -639,9 +639,6 @@ if $NEWGAME; then
     echo "I didn't quite hear that..."
     read -rp "$PROMPT" PLAYERNAME
   done
-  #make playername blue always
-  PLAYERNAME="${BLUE}$PLAYERNAME${NC}"
-  
   echo -e "Hello, $PLAYERNAME!"
 fi
 
