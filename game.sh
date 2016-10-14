@@ -9,6 +9,8 @@ VERSION="v0.0.2"
 DEBUG=false
 GAMELOOP=true
 PROMPT="${BLUE}>${NC}"
+SAVEFILE="./savegame"
+NEWGAME=true
 
 #Game Vars
 PLAYERNAME=""
@@ -29,6 +31,61 @@ GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
 #all functions
+
+function checkforsavegame {
+#check if there's an existing savegame.
+  if [ -f $SAVEFILE  ]; then
+  read -p "Savegame found. Continue this adventure? (y/n): " choice
+  case "$choice" in 
+    y|Y ) loadgame;;
+    n|N ) return;;
+    * ) echo Invalid Choice.; checkforsavegame ;;
+  esac
+  fi
+}
+
+function loadgame {
+  if [ -f $SAVEFILE ]; then
+    source $SAVEFILE
+    if $DEBUG; then
+      echo -e "${GREEN}[DEBUG] ${NC}Loaded save file $SAVEFILE"
+    fi
+    echo Savegame loaded.
+    NEWGAME=false
+  else 
+    if $DEBUG; then
+      echo -e "${GREEN}[DEBUG] ${NC}file $SAVEFILE not found."
+    fi
+    echo No savegame found!
+  fi
+  getroomdescription
+}
+
+function savegame {
+  if [ ! -f $SAVEFILE ]; then  
+    if $DEBUG; then
+      echo -e "${GREEN}[DEBUG] ${NC}No savefile found. Creating new one."
+    fi
+    touch $SAVEFILE
+  fi 
+  
+  if $DEBUG; then
+    echo -e "${GREEN}[DEBUG] ${NC}Saving variables to $SAVEFILE"
+  fi
+  echo "#untitled-text-rpg-savegame" > $SAVEFILE
+  echo "#editing this file will probably break your game experience" >> $SAVEFILE 
+  echo "#this file was created by version $VERSION and may not work in later versions" >> $SAVEFILE
+  echo PLAYERNAME="$PLAYERNAME" >> $SAVEFILE              
+  echo CURRENTMAP="$CURRENTMAP">> $SAVEFILE 
+  echo CURRENTX="$CURRENTX">> $SAVEFILE 
+  echo CURRENTY="$CURRENTY">> $SAVEFILE 
+  echo HOUSE_CHEST_OPEN=$HOUSE_CHEST_OPEN>> $SAVEFILE 
+  echo HOUSE_DOOR_OPEN=$HOUSE_DOOR_OPEN>> $SAVEFILE 
+  echo HAS_SWORD=$HAS_SWORD>> $SAVEFILE 
+  echo HAS_CHEST_KEY=$HAS_CHEST_KEY>> $SAVEFILE 
+  echo HAS_FISHING_POLE=$HAS_FISHING_POLE>> $SAVEFILE 
+  echo IS_CHEST_UNLOCKED=$IS_CHEST_UNLOCKED>> $SAVEFILE 
+}
 
 function playercommand {
   #if no command, go back to game loop
@@ -116,6 +173,8 @@ function playercommand {
       esac
     ;;
     inventory )  showinventory; return;;
+    load )  loadgame ;;
+    save )  savegame ;;
     quit )  echo "Goodbye." ; exit;;
     * ) echo "I beg your pardon?"; return 1;;
   esac
@@ -568,19 +627,23 @@ if $DEBUG; then
 fi
 echo
 
-#get playername
-echo "What is your name, adventurer?"
-read -rp "$PROMPT" PLAYERNAME
-
-#if playername is null, repeat
-while [ -z $PLAYERNAME ]; do
-  echo "I didn't quite hear that..."
+#check for exiting savegames first
+checkforsavegame
+if $NEWGAME; then 
+  #get playername
+  echo "What is your name, adventurer?"
   read -rp "$PROMPT" PLAYERNAME
-done
-#make playername blue always
-PLAYERNAME="${BLUE}$PLAYERNAME${NC}"
-
-echo -e "Hello, $PLAYERNAME!"
+  
+  #if playername is null, repeat
+  while [ -z $PLAYERNAME ]; do
+    echo "I didn't quite hear that..."
+    read -rp "$PROMPT" PLAYERNAME
+  done
+  #make playername blue always
+  PLAYERNAME="${BLUE}$PLAYERNAME${NC}"
+  
+  echo -e "Hello, $PLAYERNAME!"
+fi
 
 #Main gameloop
 echo "What will you do?"
