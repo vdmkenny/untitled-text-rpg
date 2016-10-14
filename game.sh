@@ -176,12 +176,25 @@ function playercommand {
       esac
     ;;
     inventory )  showinventory; return;;
+    help )  showhelp; return;;
     load )  loadgame ;;
     save )  savegame ;;
     quit )  echo "Goodbye." ; exit;;
     * ) echo "I beg your pardon?"; return 1;;
   esac
   
+}
+
+function showhelp {
+  echo "So, you're stuck? Try some of the following commands:"
+  echo "*go north, south, west, east, ..."
+  echo "*open X"
+  echo "*close X"
+  echo "*use X on Y"
+  echo "*look at, in X"
+  echo "*take X"
+  echo "*show inventory"
+  echo "*There are lots of other obvious and not so obvious commands!"
 }
 
 function showinventory {
