@@ -561,8 +561,6 @@ function takeobject {
 }
 
 function useobject {
-  echo "arguments: $1 $2 $3"
-  
   OBJECT1=$1
   OBJECT2=$2
   
