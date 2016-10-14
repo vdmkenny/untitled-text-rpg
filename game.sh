@@ -612,6 +612,23 @@ function useobject {
         * ) echo "That sounds fun... but I better not."
       esac
     ;;
+    key )
+      case $OBJECT2 in
+        chest|lock )
+          if $HAS_CHEST_KEY; then
+            if [[ "$CURRENTMAP,$CURRENTX,$CURRENTY" == "house,0,0" ]]; then
+              echo "You unlock the chest using the key."
+              IS_CHEST_UNLOCKED=true
+            else
+              echo "There's no $OBJECT2 around, I'm afraid."
+            fi
+          else
+            echo "This would be a smart thing to do... If you actually had a key.";
+          fi
+        ;;
+        * ) echo "That sounds fun... but I better not."
+      esac
+    ;;
     * ) echo "A $1? I don't think you have one of those..." ;;
   esac
 }
