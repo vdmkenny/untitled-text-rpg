@@ -5,7 +5,7 @@
 
 #Main Vars
 GAMENAME="Placeholder title"
-VERSION="v0.0.2"
+VERSION="v0.0.3"
 DEBUG=false
 GAMELOOP=true
 PROMPT="${BLUE}>${NC}"
