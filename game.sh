@@ -43,8 +43,16 @@ debug () {
   fi
 }
 
+# Error
+# echo the error with the correct colors
 error () {
   echo -e "${RED}[ERROR] ${NC} $@"
+}
+
+# Echohelp
+# help is a cmd in bash, don't overwrite it
+echohelp () {
+  echo -e "${BLUE}[HELP] ${NC} $@"
 }
 
 function checkforsavegame {
@@ -83,16 +91,16 @@ function savegame {
   echo "#untitled-text-rpg-savegame" > $SAVEFILE
   echo "#editing this file will probably break your game experience" >> $SAVEFILE
   echo "#this file was created by version $VERSION and may not work in later versions" >> $SAVEFILE
-  echo PLAYERNAME="$PLAYERNAME" >> $SAVEFILE
-  echo CURRENTMAP="$CURRENTMAP">> $SAVEFILE
-  echo CURRENTX="$CURRENTX">> $SAVEFILE
-  echo CURRENTY="$CURRENTY">> $SAVEFILE
-  echo HOUSE_CHEST_OPEN=$HOUSE_CHEST_OPEN>> $SAVEFILE
-  echo HOUSE_DOOR_OPEN=$HOUSE_DOOR_OPEN>> $SAVEFILE
-  echo HAS_SWORD=$HAS_SWORD>> $SAVEFILE
-  echo HAS_CHEST_KEY=$HAS_CHEST_KEY>> $SAVEFILE
-  echo HAS_FISHING_POLE=$HAS_FISHING_POLE>> $SAVEFILE
-  echo IS_CHEST_UNLOCKED=$IS_CHEST_UNLOCKED>> $SAVEFILE
+  echo "PLAYERNAME=$PLAYERNAME" >> $SAVEFILE
+  echo "CURRENTMAP=$CURRENTMAP" >> $SAVEFILE
+  echo "CURRENTX=$CURRENTX" >> $SAVEFILE
+  echo "CURRENTY=$CURRENTY" >> $SAVEFILE
+  echo "HOUSE_CHEST_OPEN=$HOUSE_CHEST_OPEN" >> $SAVEFILE
+  echo "HOUSE_DOOR_OPEN=$HOUSE_DOOR_OPEN" >> $SAVEFILE
+  echo "HAS_SWORD=$HAS_SWORD" >> $SAVEFILE
+  echo "HAS_CHEST_KEY=$HAS_CHEST_KEY" >> $SAVEFILE
+  echo "HAS_FISHING_POLE=$HAS_FISHING_POLE" >> $SAVEFILE
+  echo "IS_CHEST_UNLOCKED=$IS_CHEST_UNLOCKED" >> $SAVEFILE
 
   echo "Your progress was saved."
 }
@@ -189,15 +197,15 @@ function playercommand {
 }
 
 function showhelp {
-  echo "So, you're stuck? Try some of the following commands:"
-  echo "*go north, south, west, east, ..."
-  echo "*open X"
-  echo "*close X"
-  echo "*use X on Y"
-  echo "*look at, in X"
-  echo "*take X"
-  echo "*show inventory"
-  echo "*There are lots of other obvious and not so obvious commands!"
+  echohelp "So, you're stuck? Try some of the following commands:"
+  echohelp *go north, south, west, east, ...
+  echohelp *open X
+  echohelp *close X
+  echohelp *use X on Y
+  echohelp *look at, in X
+  echohelp *take X
+  echohelp *show inventory
+  echohelp *There are lots of other obvious and not so obvious commands!
 }
 
 function showinventory {
