@@ -643,7 +643,7 @@ if $NEWGAME; then
   read -rp "$PROMPT" PLAYERNAME
 
   #if playername is null, repeat
-  while [ -z $PLAYERNAME ]; do
+  while [ -z "$PLAYERNAME" ]; do
     echo "I didn't quite hear that..."
     read -rp "$PROMPT" PLAYERNAME
   done
