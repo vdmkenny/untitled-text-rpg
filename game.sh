@@ -36,7 +36,7 @@ function checkforsavegame {
 #check if there's an existing savegame.
   if [ -f $SAVEFILE  ]; then
   read -p "Savegame found. Continue this adventure? (y/n): " choice
-  case "$choice" in 
+  case "$choice" in
     y|Y ) loadgame;;
     n|N ) return;;
     * ) echo Invalid Choice.; checkforsavegame ;;
@@ -54,7 +54,7 @@ function loadgame {
     echo "Hello again, $PLAYERNAME!"
     getroomdescription
     NEWGAME=false
-  else 
+  else
     if $DEBUG; then
       echo -e "${GREEN}[DEBUG] ${NC}file $SAVEFILE not found."
     fi
@@ -63,30 +63,30 @@ function loadgame {
 }
 
 function savegame {
-  if [ ! -f $SAVEFILE ]; then  
+  if [ ! -f $SAVEFILE ]; then
     if $DEBUG; then
       echo -e "${GREEN}[DEBUG] ${NC}No savefile found. Creating new one."
     fi
     touch $SAVEFILE
-  fi 
-  
+  fi
+
   if $DEBUG; then
     echo -e "${GREEN}[DEBUG] ${NC}Saving variables to $SAVEFILE"
   fi
   echo "#untitled-text-rpg-savegame" > $SAVEFILE
-  echo "#editing this file will probably break your game experience" >> $SAVEFILE 
+  echo "#editing this file will probably break your game experience" >> $SAVEFILE
   echo "#this file was created by version $VERSION and may not work in later versions" >> $SAVEFILE
-  echo PLAYERNAME="$PLAYERNAME" >> $SAVEFILE              
-  echo CURRENTMAP="$CURRENTMAP">> $SAVEFILE 
-  echo CURRENTX="$CURRENTX">> $SAVEFILE 
-  echo CURRENTY="$CURRENTY">> $SAVEFILE 
-  echo HOUSE_CHEST_OPEN=$HOUSE_CHEST_OPEN>> $SAVEFILE 
-  echo HOUSE_DOOR_OPEN=$HOUSE_DOOR_OPEN>> $SAVEFILE 
-  echo HAS_SWORD=$HAS_SWORD>> $SAVEFILE 
-  echo HAS_CHEST_KEY=$HAS_CHEST_KEY>> $SAVEFILE 
-  echo HAS_FISHING_POLE=$HAS_FISHING_POLE>> $SAVEFILE 
-  echo IS_CHEST_UNLOCKED=$IS_CHEST_UNLOCKED>> $SAVEFILE 
- 
+  echo PLAYERNAME="$PLAYERNAME" >> $SAVEFILE
+  echo CURRENTMAP="$CURRENTMAP">> $SAVEFILE
+  echo CURRENTX="$CURRENTX">> $SAVEFILE
+  echo CURRENTY="$CURRENTY">> $SAVEFILE
+  echo HOUSE_CHEST_OPEN=$HOUSE_CHEST_OPEN>> $SAVEFILE
+  echo HOUSE_DOOR_OPEN=$HOUSE_DOOR_OPEN>> $SAVEFILE
+  echo HAS_SWORD=$HAS_SWORD>> $SAVEFILE
+  echo HAS_CHEST_KEY=$HAS_CHEST_KEY>> $SAVEFILE
+  echo HAS_FISHING_POLE=$HAS_FISHING_POLE>> $SAVEFILE
+  echo IS_CHEST_UNLOCKED=$IS_CHEST_UNLOCKED>> $SAVEFILE
+
   echo "Your progress was saved."
 }
 
@@ -100,14 +100,14 @@ function playercommand {
   fi
   #normalise command
   #COMMAND=$(echo $1 | tr -dc '[:alnum:]' | tr '[:upper:]' '[:lower:]')i
-  
+
   #remove some middle words
   COMMAND=$(echo $COMMAND | sed 's/\sa\s/ /g' | sed 's/\sthe\s/ /g' | sed 's/\ssome\s/ /g' | sed 's/\son\s/ /g')
-  
+
   if $DEBUG; then
     echo -e "${GREEN}[DEBUG] ${NC}Command issued: $COMMAND"
   fi
-  
+
   #process player command
   WORD1=""
   WORD2=""
@@ -121,7 +121,7 @@ function playercommand {
   else
     WORD1=$COMMAND
   fi
-  
+
   case $WORD1 in
     look )
       case $WORD2 in
@@ -182,7 +182,7 @@ function playercommand {
     quit )  echo "Goodbye." ; exit;;
     * ) echo "I beg your pardon?"; return 1;;
   esac
-  
+
 }
 
 function showhelp {
@@ -207,7 +207,7 @@ function showinventory {
   if $HAS_FISHING_POLE; then
     echo " * A fishing pole"
     HAS_SOMETHING=true
-  fi 
+  fi
   if $HAS_CHEST_KEY; then
     echo " * A key"
     HAS_SOMETHING=true
@@ -224,10 +224,10 @@ function moveroom {
   #keep last step incase we hit an invalid room
   PREVX=$CURRENTX
   PREVY=$CURRENTY
-  
+
   CURRENTX=$(echo $(($CURRENTX$1)))
   CURRENTY=$(echo $(($CURRENTY$2)))
-  
+
   TEST=$(getroomdescription)
   if ! [ $? -eq 0 ]; then
     #rollback if invalid room
@@ -280,7 +280,7 @@ function exitroom {
         echo "You can't walk through doors, dummy.";
       fi
     ;;
-    
+
     * ) echo "We're already outside!";;
   esac
 }
@@ -570,7 +570,7 @@ function takeobject {
         * ) echo "I can't see a $1 right now." ;;
       esac
     ;;
-    "overworld,0,-1" ) 
+    "overworld,0,-1" )
       case $1 in
         shiny|key ) echo "The well it too deep, you can't reach it!" ;;
         * ) echo "$1? I don't see a $1!" ;;
@@ -583,7 +583,7 @@ function takeobject {
 function useobject {
   OBJECT1=$1
   OBJECT2=$2
-  
+
   if [ -z $1 ];then
     if $DEBUG; then
       echo -e "${GREEN}[DEBUG] ${NC}No use object specified."
@@ -666,11 +666,11 @@ echo
 
 #check for exiting savegames first
 checkforsavegame
-if $NEWGAME; then 
+if $NEWGAME; then
   #get playername
   echo "What is your name, adventurer?"
   read -rp "$PROMPT" PLAYERNAME
-  
+
   #if playername is null, repeat
   while [ -z $PLAYERNAME ]; do
     echo "I didn't quite hear that..."
@@ -686,7 +686,7 @@ playercommand $COMMAND
 while $GAMELOOP; do
   read -rp "$PROMPT" COMMAND
   if playercommand $COMMAND; then echo "What will you do?"; fi
-  
+
   if $DEBUG; then
     echo -e "${GREEN}[DEBUG] ${NC}Player location: $CURRENTMAP,$CURRENTX,$CURRENTY"
   fi
