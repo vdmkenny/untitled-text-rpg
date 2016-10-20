@@ -6,7 +6,7 @@
 #Main Vars
 GAMENAME="Placeholder title"
 VERSION="v0.0.4"
-DEBUG=false
+DEBUG=true
 GAMELOOP=true
 PROMPT="${BLUE}>${NC}"
 SAVEFILE="./savegame"
@@ -32,11 +32,22 @@ NC='\033[0m' # No Color
 
 #all functions
 
+# Debug
+# If debug is set to true,
+# echo some debugging info
+debug () {
+
+  if $DEBUG
+  then
+    echo -e "${GREEN}[DEBUG] ${NC} $@"
+  fi
+}
+
 function checkforsavegame {
 #check if there's an existing savegame.
   if [ -f $SAVEFILE  ]; then
   read -p "Savegame found. Continue this adventure? (y/n): " choice
-  case "$choice" in 
+  case "$choice" in
     y|Y ) loadgame;;
     n|N ) return;;
     * ) echo Invalid Choice.; checkforsavegame ;;
@@ -47,67 +58,55 @@ function checkforsavegame {
 function loadgame {
   if [ -f $SAVEFILE ]; then
     source $SAVEFILE
-    if $DEBUG; then
-      echo -e "${GREEN}[DEBUG] ${NC}Loaded save file $SAVEFILE"
-    fi
+    debug Loaded save file $SAVEFILE
     echo Savegame loaded.
     echo "Hello again, $PLAYERNAME!"
     getroomdescription
     NEWGAME=false
-  else 
-    if $DEBUG; then
-      echo -e "${GREEN}[DEBUG] ${NC}file $SAVEFILE not found."
-    fi
+  else
+    debug file $SAVEFILE not found.
     echo No savegame found!
   fi
 }
 
 function savegame {
-  if [ ! -f $SAVEFILE ]; then  
-    if $DEBUG; then
-      echo -e "${GREEN}[DEBUG] ${NC}No savefile found. Creating new one."
-    fi
+  if [ ! -f $SAVEFILE ]; then
+    debug No savefile found. Creating new one.
     touch $SAVEFILE
-  fi 
-  
-  if $DEBUG; then
-    echo -e "${GREEN}[DEBUG] ${NC}Saving variables to $SAVEFILE"
   fi
+
+  debug Saving variables to $SAVEFILE
   echo "#untitled-text-rpg-savegame" > $SAVEFILE
-  echo "#editing this file will probably break your game experience" >> $SAVEFILE 
+  echo "#editing this file will probably break your game experience" >> $SAVEFILE
   echo "#this file was created by version $VERSION and may not work in later versions" >> $SAVEFILE
-  echo PLAYERNAME="$PLAYERNAME" >> $SAVEFILE              
-  echo CURRENTMAP="$CURRENTMAP">> $SAVEFILE 
-  echo CURRENTX="$CURRENTX">> $SAVEFILE 
-  echo CURRENTY="$CURRENTY">> $SAVEFILE 
-  echo HOUSE_CHEST_OPEN=$HOUSE_CHEST_OPEN>> $SAVEFILE 
-  echo HOUSE_DOOR_OPEN=$HOUSE_DOOR_OPEN>> $SAVEFILE 
-  echo HAS_SWORD=$HAS_SWORD>> $SAVEFILE 
-  echo HAS_CHEST_KEY=$HAS_CHEST_KEY>> $SAVEFILE 
-  echo HAS_FISHING_POLE=$HAS_FISHING_POLE>> $SAVEFILE 
-  echo IS_CHEST_UNLOCKED=$IS_CHEST_UNLOCKED>> $SAVEFILE 
- 
+  echo PLAYERNAME="$PLAYERNAME" >> $SAVEFILE
+  echo CURRENTMAP="$CURRENTMAP">> $SAVEFILE
+  echo CURRENTX="$CURRENTX">> $SAVEFILE
+  echo CURRENTY="$CURRENTY">> $SAVEFILE
+  echo HOUSE_CHEST_OPEN=$HOUSE_CHEST_OPEN>> $SAVEFILE
+  echo HOUSE_DOOR_OPEN=$HOUSE_DOOR_OPEN>> $SAVEFILE
+  echo HAS_SWORD=$HAS_SWORD>> $SAVEFILE
+  echo HAS_CHEST_KEY=$HAS_CHEST_KEY>> $SAVEFILE
+  echo HAS_FISHING_POLE=$HAS_FISHING_POLE>> $SAVEFILE
+  echo IS_CHEST_UNLOCKED=$IS_CHEST_UNLOCKED>> $SAVEFILE
+
   echo "Your progress was saved."
 }
 
 function playercommand {
   #if no command, go back to game loop
   if [ -z $1 ];then
-    if $DEBUG; then
-      echo -e "${GREEN}[DEBUG] ${NC}No command issued."
-    fi
+    debug No command issued.
     return
   fi
   #normalise command
   #COMMAND=$(echo $1 | tr -dc '[:alnum:]' | tr '[:upper:]' '[:lower:]')i
-  
+
   #remove some middle words
   COMMAND=$(echo $COMMAND | sed 's/\sa\s/ /g' | sed 's/\sthe\s/ /g' | sed 's/\ssome\s/ /g' | sed 's/\son\s/ /g')
-  
-  if $DEBUG; then
-    echo -e "${GREEN}[DEBUG] ${NC}Command issued: $COMMAND"
-  fi
-  
+
+  debug Command issued: $COMMAND
+
   #process player command
   WORD1=""
   WORD2=""
@@ -121,7 +120,7 @@ function playercommand {
   else
     WORD1=$COMMAND
   fi
-  
+
   case $WORD1 in
     look )
       case $WORD2 in
@@ -182,7 +181,7 @@ function playercommand {
     quit )  echo "Goodbye." ; exit;;
     * ) echo "I beg your pardon?"; return 1;;
   esac
-  
+
 }
 
 function showhelp {
@@ -207,7 +206,7 @@ function showinventory {
   if $HAS_FISHING_POLE; then
     echo " * A fishing pole"
     HAS_SOMETHING=true
-  fi 
+  fi
   if $HAS_CHEST_KEY; then
     echo " * A key"
     HAS_SOMETHING=true
@@ -218,16 +217,14 @@ function showinventory {
 }
 
 function moveroom {
-  if $DEBUG; then
-    echo -e "${GREEN}[DEBUG] ${NC}About to move room, calculation: $CURRENTX$1,$CURRENTX$2"
-  fi
+  debug About to move room, calculation: $CURRENTX$1,$CURRENTX$2
   #keep last step incase we hit an invalid room
   PREVX=$CURRENTX
   PREVY=$CURRENTY
-  
+
   CURRENTX=$(echo $(($CURRENTX$1)))
   CURRENTY=$(echo $(($CURRENTY$2)))
-  
+
   TEST=$(getroomdescription)
   if ! [ $? -eq 0 ]; then
     #rollback if invalid room
@@ -241,15 +238,11 @@ function moveroom {
 
 function enterroom {
   if [ -z $1 ];then
-    if $DEBUG; then
-      echo -e "${GREEN}[DEBUG] ${NC}No room specified."
-    fi
+    debug No room specified.
     echo -e "Where?"
     return
   fi
-  if $DEBUG; then
-    echo -e "${GREEN}[DEBUG] ${NC}Trying to enter room: $1"
-  fi
+  debug Trying to enter room: $1
   #which map are we on?
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
     "overworld,1,0" )
@@ -268,9 +261,7 @@ function enterroom {
 }
 
 function exitroom {
-  if $DEBUG; then
-    echo -e "${GREEN}[DEBUG] ${NC}Trying to exit room: $CURRENTMAP,$CURRENTX,$CURRENTY"
-  fi
+  debug Trying to exit room: $CURRENTMAP,$CURRENTX,$CURRENTY
   #which map are we on?
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
     "house,0,0" ) 	if $HOUSE_DOOR_OPEN; then
@@ -280,14 +271,12 @@ function exitroom {
         echo "You can't walk through doors, dummy.";
       fi
     ;;
-    
+
     * ) echo "We're already outside!";;
   esac
 }
 function warp {
-  if $DEBUG; then
-    echo -e "${GREEN}[DEBUG] ${NC}Warping to $1,$2,$3"
-  fi
+  debug Warping to $1,$2,$3
   CURRENTMAP=$1
   CURRENTX=$2
   CURRENTY=$3
@@ -309,15 +298,11 @@ function getroomdescription {
 
 function openobject {
   if [ -z $1 ];then
-    if $DEBUG; then
-      echo -e "${GREEN}[DEBUG] ${NC}No object specified."
-    fi
+    debug No object specified.
     echo -e "Open what?"
     return
   fi
-  if $DEBUG; then
-    echo -e "${GREEN}[DEBUG] ${NC}Trying to open: $1"
-  fi
+  debug Trying to open: $1
   #which map are we on?
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
     "house,0,0" )
@@ -385,15 +370,11 @@ function openobject {
 
 function closeobject {
   if [ -z $1 ];then
-    if $DEBUG; then
-      echo -e "${GREEN}[DEBUG] ${NC}No object specified."
-    fi
+    debug No object specified.
     echo -e "Close what?"
     return
   fi
-  if $DEBUG; then
-    echo -e "${GREEN}[DEBUG] ${NC}Trying to close: $1"
-  fi
+  debug Trying to close: $1
   #which map are we on?
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
     "house,0,0" )
@@ -437,15 +418,11 @@ function closeobject {
 
 function inspectobject {
   if [ -z $1 ];then
-    if $DEBUG; then
-      echo -e "${GREEN}[DEBUG] ${NC}No object specified."
-    fi
+    debug No object specified.
     echo -e "What now?"
     return
   fi
-  if $DEBUG; then
-    echo -e "${GREEN}[DEBUG] ${NC}Trying to inspect: $1"
-  fi
+  debug Trying to inspect: $1
   #which map are we on?
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
     "house,0,0" )
@@ -485,15 +462,11 @@ function inspectobject {
 
 function lookinsideobject {
   if [ -z $1 ];then
-    if $DEBUG; then
-      echo -e "${GREEN}[DEBUG] ${NC}No object specified."
-    fi
+    debug No object specified.
     echo -e "Inside what?"
     return
   fi
-  if $DEBUG; then
-    echo -e "${GREEN}[DEBUG] ${NC}Trying to look inside: $1"
-  fi
+  debug Trying to look inside: $1
   #which map are we on?
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
     "house,0,0" )
@@ -531,15 +504,11 @@ function lookinsideobject {
 
 function takeobject {
   if [ -z $1 ];then
-    if $DEBUG; then
-      echo -e "${GREEN}[DEBUG] ${NC}No object specified."
-    fi
+    debug No object specified.
     echo -e "Take what?"
     return
   fi
-  if $DEBUG; then
-    echo -e "${GREEN}[DEBUG] ${NC}Trying to take: $1"
-  fi
+  debug Trying to take: $1
   #which map are we on?
   case "$CURRENTMAP,$CURRENTX,$CURRENTY" in
     "house,0,0" )
@@ -570,7 +539,7 @@ function takeobject {
         * ) echo "I can't see a $1 right now." ;;
       esac
     ;;
-    "overworld,0,-1" ) 
+    "overworld,0,-1" )
       case $1 in
         shiny|key ) echo "The well it too deep, you can't reach it!" ;;
         * ) echo "$1? I don't see a $1!" ;;
@@ -583,32 +552,24 @@ function takeobject {
 function useobject {
   OBJECT1=$1
   OBJECT2=$2
-  
+
   if [ -z $1 ];then
-    if $DEBUG; then
-      echo -e "${GREEN}[DEBUG] ${NC}No use object specified."
-    fi
+    debug No use object specified.
     echo -e "Use what?"
     return
   fi
   if [ -z $2 ];then
-    if $DEBUG; then
-      echo -e "${GREEN}[DEBUG] ${NC}No object to use on specified."
-    fi
+    debug No object to use on specified.
     echo -e "Use it on what?"
     return 1
   fi
   #incase of "fishing pole or fishing rod"
   if [[ "$2" == "pole" ]] || [[ "$2" == "rod" ]]; then
-    if $DEBUG; then
-      echo -e "${GREEN}[DEBUG] ${NC}Shifting object arguments because of fishing pole."
-    fi
+    debug Shifting object arguments because of fishing pole.
     OBJECT1=$2
     OBJECT2=$3
   fi
-  if $DEBUG; then
-    echo -e "${GREEN}[DEBUG] ${NC}Trying to use $OBJECT1 on $OBJECT2"
-  fi
+  debug Trying to use $OBJECT1 on $OBJECT2
   #which item are we using?
   case "$OBJECT1" in
     pole|rod )
@@ -659,18 +620,16 @@ clear
 #New Game Introduction
 echo -e "Welcome to ${RED}$GAMENAME $VERSION!${NC}"
 #check if we are in debug
-if $DEBUG; then
-  echo -e "${GREEN}Debug mode enabled${NC}"
-fi
+debug ${GREEN}Debug mode enabled${NC}
 echo
 
 #check for exiting savegames first
 checkforsavegame
-if $NEWGAME; then 
+if $NEWGAME; then
   #get playername
   echo "What is your name, adventurer?"
   read -rp "$PROMPT" PLAYERNAME
-  
+
   #if playername is null, repeat
   while [ -z $PLAYERNAME ]; do
     echo "I didn't quite hear that..."
@@ -686,8 +645,6 @@ playercommand $COMMAND
 while $GAMELOOP; do
   read -rp "$PROMPT" COMMAND
   if playercommand $COMMAND; then echo "What will you do?"; fi
-  
-  if $DEBUG; then
-    echo -e "${GREEN}[DEBUG] ${NC}Player location: $CURRENTMAP,$CURRENTX,$CURRENTY"
-  fi
+
+  debug Player location: $CURRENTMAP,$CURRENTX,$CURRENTY
 done
