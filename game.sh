@@ -44,6 +44,8 @@ debug () {
   fi
 }
 
+# Toggledebug
+# toggle the status of debug mode
 toggledebug () {
   if $DEBUG
   then
