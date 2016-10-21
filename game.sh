@@ -4,8 +4,8 @@
 #
 
 #Main Vars
-GAMENAME="Placeholder title"
-VERSION="v0.0.4"
+GAMENAME="Untitled Text RPG"
+VERSION="v0.0.5"
 DEBUG=true
 GAMELOOP=true
 PROMPT="${BLUE}>${NC}"
@@ -23,6 +23,7 @@ HAS_SWORD=false
 HAS_CHEST_KEY=false
 HAS_FISHING_POLE=false
 IS_CHEST_UNLOCKED=false
+IS_GOBLIN_DEAD=false
 
 #Colors
 BLUE='\033[0;34m'
@@ -101,6 +102,7 @@ function savegame {
   echo "HAS_CHEST_KEY=$HAS_CHEST_KEY" >> $SAVEFILE
   echo "HAS_FISHING_POLE=$HAS_FISHING_POLE" >> $SAVEFILE
   echo "IS_CHEST_UNLOCKED=$IS_CHEST_UNLOCKED" >> $SAVEFILE
+  echo "IS_GOBLIN_DEAD=$IS_GOBLIN_DEAD" >> $SAVEFILE
 
   echo "Your progress was saved."
 }
@@ -179,6 +181,12 @@ function playercommand {
         useobject pole $WORD2; return
       fi
     ;;
+    stab|kill )
+        case $WORD2 in
+          goblin ) useobject sword goblin; return;;
+          * ) echo "Stab what?"; return;;
+        esac
+    ;;
     exit )  exitroom; return;;
     show )
       case $WORD2 in
@@ -236,7 +244,20 @@ function moveroom {
 
   CURRENTX=$(echo $(($CURRENTX$1)))
   CURRENTY=$(echo $(($CURRENTY$2)))
+ 
+  if [ "$CURRENTMAP,$CURRENTX,$CURRENTY" == "overworld,-2,0" ]; then
+    #block path if goblin is alive
+    if ! $IS_GOBLIN_DEAD; then 
+      #rollback if invalid room
+      debug "Goblin is still alive, rolling back movement."
+      CURRENTX=$PREVX
+      CURRENTY=$PREVY
+      echo "You try to pass the goblin, but it agressively blocks your path with his spear, and pushes you back."
+      return
+    fi
+  fi
 
+  #check if room exists
   TEST=$(getroomdescription)
   if ! [ $? -eq 0 ]; then
     #rollback if invalid room
@@ -301,8 +322,16 @@ function getroomdescription {
     "overworld,0,0" ) echo "You find yourself on a crossroad. There is a road in each direction." ; return ;;
     "overworld,0,1" ) echo "You find yourself on a dead end. There is a road to the south." ; return ;;
     "overworld,0,-1" ) echo "You're on a dead end, leading to an old water well. There is a road to the north." ; return ;;
-    "overworld,-1,0" ) echo "You find yourself on a dead end. There is a road to the west." ; return ;;
-    "overworld,1,0" ) echo "You find yourself on a road leading to a derelict cabin. There is a road to the east." ; return ;;
+    "overworld,-1,0" ) echo "You're on a path surrounded by trees. It leads either east or west." ; 
+    if ! $IS_GOBLIN_DEAD; then
+      echo "There's a mean looking goblin blocking the path towards the east. It looks like he's guarding it." 
+    else
+      echo "A dead goblin is laying in the middle of the path. It's quite brutal."
+    fi
+    return ;;
+    "overworld,-2,0" ) echo "You're on a path ending at the entrance of a cave. To the west, it goes back into the woods." ; return ;;
+    "overworld,1,0" ) echo "You find yourself on a road leading to a derelict cabin. The road goes east and west." ; return ;;
+    "overworld,2,0" ) echo "The path leads onto a dead end. There's a small open area surrounded by trees. In the center of this clearing, there is a perfect circle of mushrooms growing." ; return ;;
     "house,0,0" ) echo "You're inside a small abandoned cabin. It's mostly empty, but there's an rickety table in the center of the room with a small chest on it. There's also some fishing supplies in the corner, and a very disturbing painting of a clown on the wall." ; return ;;
     * ) error Invalid room. You should not be here; return 1;;
   esac
@@ -468,6 +497,18 @@ function inspectobject {
         * ) echo "I'm not sure what you're referring to."; return;;
       esac
     ;;
+    "overworld,-1,0" )
+      case $1 in
+        goblin )
+          if $IS_GOBLIN_DEAD; then
+            echo "It's very dead."
+          else
+            echo "A very mean and agressive creature. It has a pale, greenish skin, and is dressed in shoddy, makeshift armour. Despite this, it has both the size and intelligence of a 6 year old."
+          fi
+        ;;
+        * ) echo "$1? I don't see a $1!";;
+      esac
+    ;;
     * ) echo "$1? I don't see a $1!";;
   esac
 }
@@ -621,6 +662,23 @@ function useobject {
         ;;
         * ) echo "That sounds fun... but I better not."
       esac
+    ;;
+    sword )
+      if $HAS_SWORD; then
+        case $OBJECT2 in
+          goblin ) 
+            if ! $IS_GOBLIN_DEAD; then
+              echo "Not expecting your sudden attack, you manage to cleanly stab the goblin between the ribs. It's eyes widen, and falls to floor. Some dark green blood pools around him."
+              IS_GOBLIN_DEAD=true
+            else
+              echo "That's just morbid."
+            fi
+          ;;
+          * ) echo "Stab a $OBJECT2? Why?";;
+        esac
+      else
+        echo "Stabbing something is much easier when you have something pointy."
+      fi
     ;;
     * ) echo "A $1? I don't think you have one of those..." ;;
   esac
