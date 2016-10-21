@@ -6,7 +6,7 @@
 #Main Vars
 GAMENAME="Untitled Text RPG"
 VERSION="v0.0.5"
-DEBUG=true
+DEBUG=false
 GAMELOOP=true
 PROMPT="${BLUE}>${NC}"
 SAVEFILE="./savegame"
@@ -44,6 +44,16 @@ debug () {
   fi
 }
 
+toggledebug () {
+  if $DEBUG
+  then
+    debug "Disabled debugging mode."
+    DEBUG=false
+  else
+    DEBUG=true
+    debug "Enabled debugging mode."
+  fi
+}
 # Error
 # echo the error with the correct colors
 error () {
@@ -198,6 +208,7 @@ function playercommand {
     help )  showhelp; return;;
     load )  loadgame ;;
     save )  savegame ;;
+    toggledebug )  toggledebug ;;
     quit )  echo "Goodbye." ; exit;;
     * ) echo "I beg your pardon?"; return 1;;
   esac
