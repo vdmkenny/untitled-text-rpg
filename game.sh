@@ -24,6 +24,9 @@ HAS_CHEST_KEY=false
 HAS_FISHING_POLE=false
 IS_CHEST_UNLOCKED=false
 IS_GOBLIN_DEAD=false
+HAS_FULL_BOTTLE=false
+HAS_EMPTY_BOTTLE=false
+HAS_FAIRY_BOTTLE=false
 
 #Colors
 BLUE='\033[0;34m'
@@ -115,6 +118,9 @@ function savegame {
   echo "HAS_FISHING_POLE=$HAS_FISHING_POLE" >> $SAVEFILE
   echo "IS_CHEST_UNLOCKED=$IS_CHEST_UNLOCKED" >> $SAVEFILE
   echo "IS_GOBLIN_DEAD=$IS_GOBLIN_DEAD" >> $SAVEFILE
+  echo "HAS_FULL_BOTTLE=$HAS_FULL_BOTTLE" >> $SAVEFILE
+  echo "HAS_EMPTY_BOTTLE=$HAS_EMPTY_BOTTLE" >> $SAVEFILE
+  echo "HAS_FAIRY_BOTTLE=$HAS_FAIRY_BOTTLE" >> $SAVEFILE
 
   echo "Your progress was saved."
 }
@@ -207,6 +213,8 @@ function playercommand {
       esac
     ;;
     inventory )  showinventory; return;;
+    drink ) drinkobject $WORD2; return;;
+    empty ) emptyobject $WORD2; return;;
     help )  showhelp; return;;
     load )  loadgame ;;
     save )  savegame ;;
@@ -242,6 +250,18 @@ function showinventory {
   fi
   if $HAS_CHEST_KEY; then
     echo " * A key"
+    HAS_SOMETHING=true
+  fi
+  if $HAS_FULL_BOTTLE; then
+    echo " * A bottle of... something"
+    HAS_SOMETHING=true
+  fi
+  if $HAS_EMPTY_BOTTLE; then
+    echo " * An empty glass bottle"
+    HAS_SOMETHING=true
+  fi
+  if $HAS_FAIRY_BOTTLE; then
+    echo " * A glass bottle containing a faery"
     HAS_SOMETHING=true
   fi
   if ! $HAS_SOMETHING; then
@@ -514,7 +534,7 @@ function inspectobject {
       case $1 in
         goblin )
           if $IS_GOBLIN_DEAD; then
-            echo "It's very dead."
+            echo "It's very dead. It has few belongings, besides his armor, it has a spear, and a glass bottle hanging from it's belt."
           else
             echo "A very mean and agressive creature. It has a pale, greenish skin, and is dressed in shoddy, makeshift armour. Despite this, it has both the size and intelligence of a 6 year old."
           fi
@@ -611,6 +631,25 @@ function takeobject {
         * ) echo "$1? I don't see a $1!" ;;
       esac
     ;;
+    "overworld,-1,0" )
+       case $1 in
+         bottle|booze )
+           if $IS_GOBLIN_DEAD; then 
+             if $HAS_FULL_BOTTLE || $HAS_EMPTY_BOTTLE || $HAS_FAIRY_BOTTLE; then
+               echo "You've already taken it."
+             else
+               HAS_FULL_BOTTLE=true
+               echo "You pick up the bottle. It's filled with a foul smelling, suspicious dark liquid."
+             fi
+           else
+             echo "For some reason, I doubt he'd give it to you."
+           fi
+         ;;
+         goblin ) echo "What would you do with a goblin corpse?" ;;
+         spear ) echo "It's very crude, you should stick to your sword." ;;
+         * ) echo "$1? I don't see a $1!";;
+       esac
+    ;;
     * ) echo "$1? I don't see a $1!";;
   esac
 }
@@ -697,6 +736,61 @@ function useobject {
   esac
 }
 
+function drinkobject {
+  debug "Trying to drink: $1"
+  if [ -z $1 ]; then
+    echo "If only there was a pub nearby."    
+    return
+  fi
+  case $1 in
+    bottle )
+      if $HAS_FULL_BOTTLE; then
+        #get drunk
+        debug "Blackout mode!"
+        HAS_FULL_BOTTLE=false
+        HAS_EMPTY_BOTTLE=true
+        echo -n "You decide to take a risk and take a swig from the bottle"
+        sleep 1
+        echo -n "."
+        sleep 1
+        echo -n "."
+        sleep 1
+        echo "."
+        HAS_SWORD=false
+        warp overworld 0 -1
+        echo "You open your eyes. Everything hurts. How did you get here?"      
+      elif $HAS_EMPTY_BOTTLE; then
+        echo "It's already empty!"
+      elif $HAS_FAIRY_BOTTLE; then
+        echo "Seems a bit cruel. Besides, I don't think it would taste good."
+      fi
+    ;;
+    * ) echo "I don't believe you can drink that." ;;
+  esac
+}
+
+function emptyobject {
+  debug "Trying to empty: $1"
+  case $1 in
+    bottle )
+      if $HAS_FULL_BOTTLE; then
+        echo "You decide to play it safe, and pour the bottle out on the ground."
+        echo "After all, goblins aren't exactly known for their brewing skills."
+        HAS_FULL_BOTTLE=false
+        HAS_EMPTY_BOTTLE=true
+      elif $HAS_EMPTY_BOTTLE; then
+        echo "It's already empty!"
+      elif $HAS_FAIRY_BOTTLE; then
+        echo "Be free, little faery!"
+        echo "As soon as you open the bottle, the faery flies off in a hurry."
+        HAS_FAIRY_BOTTLE=false
+        HAS_EMPTY_BOTTLE=true
+      fi
+    ;;
+    * ) echo "Empty what?" ;;
+  esac
+}
+
 COMMAND=""
 #clear the terminal
 clear
@@ -728,6 +822,5 @@ playercommand $COMMAND
 while $GAMELOOP; do
   read -rp "$PROMPT" COMMAND
   if playercommand $COMMAND; then echo "What will you do?"; fi
-
   debug Player location: $CURRENTMAP,$CURRENTX,$CURRENTY
 done
