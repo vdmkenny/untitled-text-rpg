@@ -557,6 +557,11 @@ function inspectobject {
         * ) echo "$1? I don't see a $1!";;
       esac
     ;;
+    "fairycircle,0,0" )
+      case $1 in
+        fair*|light* ) echo "When you look closer, the bright spots of light are actually tiny flying creatures!" ;;
+      esac
+    ;;
     * ) echo "$1? I don't see a $1!";;
   esac
 }
@@ -692,6 +697,7 @@ function useobject {
   debug Trying to use $OBJECT1 on $OBJECT2
   #which item are we using?
   case "$OBJECT1" in
+    bottle) catchobject fairy bottle;;
     pole|rod )
       case $OBJECT2 in
         well|water )
@@ -811,7 +817,7 @@ function catchobject {
   #catch X with Y
   #use Y on X
 
-  if [ $2 == "fairy" ]; then
+  if [[ $2 == "fairy" ]]; then
     # argument switcheroo
     TEMP=$1
     1=$2
