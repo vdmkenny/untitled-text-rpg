@@ -5,7 +5,7 @@
 
 #Main Vars
 GAMENAME="Untitled Text RPG"
-VERSION="v0.0.5"
+VERSION="v0.0.6"
 DEBUG=false
 GAMELOOP=true
 PROMPT="${BLUE}>${NC}"
