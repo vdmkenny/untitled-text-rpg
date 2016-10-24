@@ -135,7 +135,7 @@ function playercommand {
   #COMMAND=$(echo $1 | tr -dc '[:alnum:]' | tr '[:upper:]' '[:lower:]')i
 
   #remove some middle words
-  COMMAND=$(echo $COMMAND | sed 's/\sa\s/ /g' | sed 's/\sthe\s/ /g' | sed 's/\ssome\s/ /g' | sed 's/\son\s/ /g')
+  COMMAND=$(echo $COMMAND | sed 's/\sa\s/ /g' | sed 's/\sthe\s/ /g' | sed 's/\ssome\s/ /g' | sed 's/\son\s/ /g' | sed 's/\swith\s/ /g')
 
   debug Command issued: $COMMAND
 
@@ -215,6 +215,7 @@ function playercommand {
     inventory )  showinventory; return;;
     drink ) drinkobject $WORD2; return;;
     empty ) emptyobject $WORD2; return;;
+    catch ) catchobject $WORD2 $WORD3; return;;
     help )  showhelp; return;;
     load )  loadgame ;;
     save )  savegame ;;
@@ -261,7 +262,7 @@ function showinventory {
     HAS_SOMETHING=true
   fi
   if $HAS_FAIRY_BOTTLE; then
-    echo " * A glass bottle containing a faery"
+    echo " * A glass bottle containing a fairy"
     HAS_SOMETHING=true
   fi
   if ! $HAS_SOMETHING; then
@@ -320,6 +321,16 @@ function enterroom {
             echo "The door is closed.";
           fi
         ;;
+        * ) echo "There is no $1 here...";;
+      esac
+    ;;
+    "overworld,2,0" )
+      case $1 in
+        fairy|mushroom|circle)
+          echo "You nimbly hop over a mushroom into the circle."
+          warp fairycircle 0 0
+        ;;
+        * ) echo "There is no $1 here...";;
       esac
     ;;
     * ) echo "There is no $1 here...";;
@@ -337,7 +348,10 @@ function exitroom {
         echo "You can't walk through doors, dummy.";
       fi
     ;;
-
+    "fairycircle,0,0" )
+      echo "You hop back out of the circle. The tiny lights dissapear as fast as they appeared."
+      warp overworld 2 0
+    ;;
     * ) echo "We're already outside!";;
   esac
 }
@@ -364,8 +378,9 @@ function getroomdescription {
     return ;;
     "overworld,-2,0" ) echo "You're on a path ending at the entrance of a cave. To the west, it goes back into the woods." ; return ;;
     "overworld,1,0" ) echo "You find yourself on a road leading to a derelict cabin. The road goes east and west." ; return ;;
-    "overworld,2,0" ) echo "The path leads onto a dead end. There's a small open area surrounded by trees. In the center of this clearing, there is a perfect circle of mushrooms growing." ; return ;;
+    "overworld,2,0" ) echo "You're on a dead end. There's a small open area surrounded by trees. In the center of this clearing, there is a perfect circle of mushrooms growing. The path returns to the east." ; return ;;
     "house,0,0" ) echo "You're inside a small abandoned cabin. It's mostly empty, but there's an rickety table in the center of the room with a small chest on it. There's also some fishing supplies in the corner, and a very disturbing painting of a clown on the wall." ; return ;;
+    "fairycircle,0,0" ) echo "You're inside the mushroom circle... A lot of tiny flying lights surround you suddenly. Are those... fairies?" ; return ;;
     * ) error Invalid room. You should not be here; return 1;;
   esac
 }
@@ -781,13 +796,46 @@ function emptyobject {
       elif $HAS_EMPTY_BOTTLE; then
         echo "It's already empty!"
       elif $HAS_FAIRY_BOTTLE; then
-        echo "Be free, little faery!"
-        echo "As soon as you open the bottle, the faery flies off in a hurry."
+        echo "Be free, little fairy!"
+        echo "As soon as you open the bottle, the fairy flies off in a hurry."
         HAS_FAIRY_BOTTLE=false
         HAS_EMPTY_BOTTLE=true
       fi
     ;;
     * ) echo "Empty what?" ;;
+  esac
+}
+
+function catchobject {
+  
+  #catch X with Y
+  #use Y on X
+
+  if [ $2 == "fairy" ]; then
+    # argument switcheroo
+    TEMP=$1
+    1=$2
+    2=$TEMP
+  fi
+
+  debug "Trying to catch $1 with $2"
+  case $1 in
+    fairy )
+      case $2 in
+        bottle )
+          if $HAS_FULL_BOTTLE || $HAS_FAIRY_BOTTLE; then
+            echo "That bottle is already full."
+          elif $HAS_EMPTY_BOTTLE; then
+            echo "You wave around the bottle with the opening-first at the fairies, it takes a few tries, but you manage to catch one inside!"
+            HAS_EMPTY_BOTTLE=false
+            HAS_FAIRY_BOTTLE=true
+          fi
+        ;;
+        "" ) echo "You try to catch a fairy out of the sky, but they keep slipping through your fingers!";;
+        * ) echo "Catch it with what now?";;
+      esac
+    ;;
+    * ) echo "Catch what?" ;;
   esac
 }
 
