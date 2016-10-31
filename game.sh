@@ -19,6 +19,7 @@ CURRENTX="0"
 CURRENTY="0"
 HOUSE_CHEST_OPEN=false
 HOUSE_DOOR_OPEN=false
+HAS_TAKEN_SWORD=false
 HAS_SWORD=false
 HAS_CHEST_KEY=false
 HAS_FISHING_POLE=false
@@ -113,6 +114,7 @@ function savegame {
   echo "CURRENTY=$CURRENTY" >> $SAVEFILE
   echo "HOUSE_CHEST_OPEN=$HOUSE_CHEST_OPEN" >> $SAVEFILE
   echo "HOUSE_DOOR_OPEN=$HOUSE_DOOR_OPEN" >> $SAVEFILE
+  echo "HAS_TAKEN_SWORD=$HAS_TAKEN_SWORD" >> $SAVEFILE
   echo "HAS_SWORD=$HAS_SWORD" >> $SAVEFILE
   echo "HAS_CHEST_KEY=$HAS_CHEST_KEY" >> $SAVEFILE
   echo "HAS_FISHING_POLE=$HAS_FISHING_POLE" >> $SAVEFILE
@@ -583,7 +585,7 @@ function lookinsideobject {
           fi
           if $HOUSE_CHEST_OPEN; then
             echo "You peer into the chest with hopeful eyes..."
-            if $HAS_SWORD; then
+            if $HAS_TAKEN_SWORD; then
               echo "There's nothing in there but dirt."
             else
               echo "There's a shortsword in there! It's obviously well used, but it still looks sharp."
@@ -620,8 +622,8 @@ function takeobject {
     "house,0,0" )
       case $1 in
         shortsword|sword ) if $HOUSE_CHEST_OPEN; then
-            if ! $HAS_SWORD; then
-              HAS_SWORD=true;
+            if ! $HAS_TAKEN_SWORD; then
+              HAS_TAKEN_SWORD=true;
               echo "You pick up the sword from the chest. It makes a pleasing sshinggg sound while doing so.";
             else
               echo "There was only one... Don't get greedy."
