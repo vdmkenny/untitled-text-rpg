@@ -8,14 +8,7 @@ Things to do:
     *Only have descriptions of what's around you if player has a light source
     *Have a cave room where you fall to your death if you're doing it blind, make this room avoidable to get through the cave
     *The cave needs an exit to a different area.
-*Goblin alcohol interaction:
-    *After killing the goblin, inspecting it will reveal it's holding a bottle of alcohol
-    *You can take the bottle, and then either drink it or pour it out
-    *If you drink it, you pass out, and wake up near the well without your sword.
-*Fairy circle
-    *You can step inside the mushroom circle, and see fairies show up when you're inside
-    *If you have a bottle, you can catch one, this is a lightsource.
-
+*Hide sword after drinking alcohol
 
 *Add more "detail" to the world by adding more things to look at
 *More commands like "take a nap"
