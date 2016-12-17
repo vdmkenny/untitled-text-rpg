@@ -624,6 +624,7 @@ function takeobject {
         shortsword|sword ) if $HOUSE_CHEST_OPEN; then
             if ! $HAS_TAKEN_SWORD; then
               HAS_TAKEN_SWORD=true;
+              HAS_SWORD=true;
               echo "You pick up the sword from the chest. It makes a pleasing sshinggg sound while doing so.";
             else
               echo "There was only one... Don't get greedy."
