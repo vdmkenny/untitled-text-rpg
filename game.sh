@@ -75,7 +75,9 @@ echohelp () {
 function checkforsavegame {
 #check if there's an existing savegame.
   if [ -f $SAVEFILE  ]; then
+  echo -e "${GREEN}"
   read -p "Savegame found. Continue this adventure? (y/n): " choice
+  echo -e "${NC}"
   case "$choice" in
     y|Y ) loadgame;;
     n|N ) return;;
@@ -242,7 +244,7 @@ function showhelp {
 
 function showinventory {
   HAS_SOMETHING=false
-  echo "In your possession, you have:"
+  echo -e "${BLUE}In your possession, you have:"
   if $HAS_SWORD; then
     echo " * A short sword"
     HAS_SOMETHING=true
@@ -270,6 +272,7 @@ function showinventory {
   if ! $HAS_SOMETHING; then
     echo "...nothing!"
   fi
+  echo -e "${NC}"
 }
 
 function moveroom {
